@@ -18,8 +18,7 @@ export default async function handler(request, response) {
         }
 
         // Use the client-provided API key, or fall back to the environment variable.
-        var apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-
+        const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
             console.error('GEMINI_API_KEY is not set in environment variables or provided by the client.');
             return response.status(400).json({ error: 'Server configuration error: API key is missing. Please provide a key.' });
