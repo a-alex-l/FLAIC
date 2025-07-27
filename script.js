@@ -23,10 +23,11 @@ generateButton.addEventListener('click', handleGenerateClick);
 async function handleGenerateClick() {
     if (isGenerating) return; // Prevent multiple clicks
     const geminiApiKey = geminiApiKeyInput.value.trim();
-    if (!geminiApiKey) {
+    /*if (!geminiApiKey) {
         alert('Please enter your Gemini API Key.');
         return;
-    }
+    }*/
+   const token = geminiApiKey; // TODO: crypt API KEY on server
 
     isGenerating = true;
     generateButton.disabled = true;
@@ -34,10 +35,10 @@ async function handleGenerateClick() {
     try {
         if (!storyData) {
             // If there's no story, this is the first click.
-            await startNewStory(geminiApiKey);
+            await startNewStory(token);
         } else {
             // If a story exists, we're generating the next event.
-            await generateNextStep(geminiApiKey);
+            await generateNextStep(token);
         }
     } catch (error) {
         console.error('An error occurred in the main generation flow:', error);
@@ -52,7 +53,7 @@ async function handleGenerateClick() {
  * STEP 1: Starts a brand new story.
  * Called only on the very first "Start Story" click.
  */
-async function startNewStory(apiKey) {
+async function startNewStory(token) {
     const userPromptText = promptInput.value.trim();
     if (!userPromptText) {
         alert('Please enter a story prompt.');
@@ -72,7 +73,7 @@ async function startNewStory(apiKey) {
         const response = await fetch('/api/generate_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: initialPrompt, apiKey: apiKey })
+            body: JSON.stringify({ prompt: initialPrompt, token: token })
         });
         if (!response.ok) throw new Error(`Story generation failed: ${ (await response.json()).error }`);
         
@@ -92,7 +93,7 @@ async function startNewStory(apiKey) {
         await checkAndFetchImages();
 
         // Start the sequence by generating the very first step
-        await generateNextStep(apiKey);
+        await generateNextStep(token);
 
     } catch (error) {
         // If starting fails, reset to initial state
@@ -106,7 +107,7 @@ async function startNewStory(apiKey) {
 /**
  * Generates and displays the next event in the story sequence.
  */
-async function generateNextStep(apiKey) {
+async function generateNextStep(token) {
     // 1. Lock in the caption from the PREVIOUS panel (if one exists)
     if (currentEventIndex >= 0) {
         const lastPanel = document.getElementById(`panel-${currentEventIndex}`);
@@ -132,7 +133,7 @@ async function generateNextStep(apiKey) {
 
     // 4. Proactively fetch more content in the background
     // These run in parallel and don't block the UI
-    checkAndFetchStoryContinuation(apiKey).catch(console.error);
+    checkAndFetchStoryContinuation(token).catch(console.error);
     checkAndFetchImages().catch(console.error);
 }
 
@@ -184,7 +185,7 @@ async function displayCurrentPanel() {
  * Checks if more story events are needed and fetches them.
  * Triggered if fewer than 6 events are left in the queue.
  */
-async function checkAndFetchStoryContinuation(apiKey) {
+async function checkAndFetchStoryContinuation(token) {
     if (storyData.events.length - 1 - currentEventIndex < 6) {
         updateStatus("Getting more of the story from the AI...");
         console.log("Fewer than 6 events remaining, fetching continuation...");
@@ -207,7 +208,7 @@ async function checkAndFetchStoryContinuation(apiKey) {
         const response = await fetch('/api/generate_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: continuationPrompt, apiKey: apiKey })
+            body: JSON.stringify({ prompt: continuationPrompt, token: token })
         });
         
         if (!response.ok) {
