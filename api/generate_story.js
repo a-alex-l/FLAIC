@@ -1,6 +1,6 @@
 /**
  * This function handles POST requests to /api/generate_story
- * It expects a JSON body with "prompt": { "prompt": "..." }
+ * It expects a JSON body with "prompt" and an optional "apiKey"
  * It returns the structured JSON response from the Gemini API
  */
 export default async function handler(request, response) {
@@ -10,20 +10,23 @@ export default async function handler(request, response) {
     }
 
     try {
-        const { prompt } = request.body;
+        // Now expecting 'prompt' and 'apiKey' from the request body
+        const { prompt, apiKey: clientApiKey } = request.body;
 
         if (!prompt) {
-            return response.status(400).json({ error: 'Request body must contain both a "prompt".' });
+            return response.status(400).json({ error: 'Request body must contain a "prompt".' });
         }
 
-        const apiKey = process.env.GEMINI_API_KEY;
+        // Use the client-provided API key, or fall back to the environment variable.
+        var apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+
         if (!apiKey) {
-            console.error('GEMINI_API_KEY is not set in environment variables.');
-            return response.status(500).json({ error: 'Server configuration error.' });
+            console.error('GEMINI_API_KEY is not set in environment variables or provided by the client.');
+            return response.status(400).json({ error: 'Server configuration error: API key is missing. Please provide a key.' });
         }
 
-        const model = "gemini-2.5-flash"; // A fast and capable model
-        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const model = "gemini-2.5-flash"
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;    
 
         const requestBody = {
             "contents": [{ "parts": [{ "text": prompt }] }],
@@ -45,17 +48,14 @@ export default async function handler(request, response) {
             console.error('Gemini API Error:', responseData);
             return response.status(geminiResponse.status).json({ error: responseData.error?.message || 'Failed to generate story.' });
         }
-        
-        // When a schema is used, the Gemini API returns a JSON string in the `text` field.
-        // We must parse this string to get the actual JSON object.
+
         const jsonText = responseData.candidates[0].content.parts[0].text;
         const resultJson = JSON.parse(jsonText);
 
-        // Send the final, parsed JSON object back to the client.
         response.status(200).json(resultJson);
 
     } catch (error) {
-        console.error('Error in generate_story handler:', error.message);
+        console.error('Error in generate_story handler:', error);
         response.status(500).json({ error: error.message || 'An internal server error occurred.' });
     }
 }
@@ -82,13 +82,13 @@ const STORY_SCHEMA = {
         },
         "events": {
             "type": "array",
-            "description": "A sequence of panels that tell a story, similar to a comic strip. (Aim for around 20 events)",
+            "description": "A sequence of panels that tell a story, similar to a comic strip. (Aim for around 20 events)",        
             "items": {
                 "type": "object",
                 "properties": {
                     "caption": {
                         "type": "string",
-                        "description": "A short narrative text for the panel, like a narrator's box or a character's thought bubble. (Aim for around  20 words)"
+                        "description": "A short narrative text for the panel, like a narrator's box or a character's thought bubble. (Aim for around 30 words)"
                     },
                     "depiction": {
                         "type": "string",
