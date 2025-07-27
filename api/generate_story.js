@@ -103,13 +103,15 @@ const STORY_SCHEMA = {
         }
     },
     "propertyOrdering": [
-        "world",
+        "world_info",
         "past",
-        "characters"
+        "characters",
+        "events"
     ],
     "required": [
-        "world",
+        "world_info",
         "past",
-        "characters"
+        "characters",
+        "events"
     ]
 };
