@@ -1,6 +1,5 @@
 // --- DOM ELEMENT REFERENCES ---
 const generateButton = document.getElementById('generate-btn');
-const statusElement = document.getElementById('status');
 const comicContainer = document.getElementById('comic-container');
 const promptInput = document.getElementById('prompt-input');
 const controlsContainer = document.getElementById('controls-container');
@@ -42,7 +41,6 @@ async function handleGenerateClick() {
         }
     } catch (error) {
         console.error('An error occurred in the main generation flow:', error);
-        updateStatus(`Error: ${error.message}`);
     } finally {
         isGenerating = false;
         generateButton.disabled = false;
@@ -60,7 +58,6 @@ async function startNewStory(token) {
         throw new Error("Empty prompt.");
     }
     
-    updateStatus('Generating initial story world...');
     comicContainer.innerHTML = ''; // Clear the comic container
 
     const initialPrompt = "Generate a story world and character descriptions based on the following setting. " +
@@ -87,7 +84,6 @@ async function startNewStory(token) {
         // Prepare the UI for the interactive part
         promptInput.style.display = 'none'; // Hide the initial large textarea
         generateButton.textContent = 'Generate Next Event';
-        updateStatus('Story created! Generating first images...');
 
         // Pre-fetch the first batch of images
         await checkAndFetchImages();
@@ -126,7 +122,6 @@ async function generateNextStep(token) {
     
     // 2. Move to the next event
     currentEventIndex++;
-    updateStatus(`Displaying event ${currentEventIndex + 1} of ${storyData.events.length}...`);
 
     // 3. Display the new panel
     await displayCurrentPanel();
@@ -143,7 +138,6 @@ async function generateNextStep(token) {
 async function displayCurrentPanel() {
     const event = storyData.events[currentEventIndex];
     if (!event) {
-        updateStatus("You've reached the end of the story!");
         generateButton.style.display = 'none'; // Hide button at the end
         return;
     }
@@ -161,10 +155,8 @@ async function displayCurrentPanel() {
     } else {
         // If image isn't ready, show a placeholder and try to load it
         imageElement.src = ""; // Placeholder can be set in CSS
-        updateStatus(`Image for event ${currentEventIndex + 1} is being generated...`);
         // Poll for the image
         await waitForImage(currentEventIndex);
-        updateStatus(`Displaying event ${currentEventIndex + 1} of ${storyData.events.length}...`);
     }
 
     // Create editable caption element
@@ -187,7 +179,6 @@ async function displayCurrentPanel() {
  */
 async function checkAndFetchStoryContinuation(token) {
     if (storyData.events.length - 1 - currentEventIndex < 6) {
-        updateStatus("Getting more of the story from the AI...");
         console.log("Fewer than 6 events remaining, fetching continuation...");
 
         const storySoFar = { ...storyData, events: [] }; // Clone story without events
@@ -221,7 +212,6 @@ async function checkAndFetchStoryContinuation(token) {
         storyData.events.push(...newStoryPart.events);
         storyData.past = newStoryPart.past; // Update the past
         console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
-        updateStatus("Story has been extended!");
     }
 }
 
@@ -293,11 +283,4 @@ function waitForImage(index) {
             }
         }, 500); // Check every half a second
     });
-}
-
-/**
- * Updates the status message on the page.
- */
-function updateStatus(message) {
-    statusElement.textContent = message;
 }

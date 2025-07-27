@@ -100,16 +100,6 @@ h1 {
     cursor: not-allowed;
 }
 
-/* --- Status Message --- */
-.status-section {
-    text-align: center;
-    margin: 1rem 0;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #555;
-    min-height: 25px; /* Prevent layout shift */
-}
-
 /* --- Comic Display Area --- */
 .comic-container {
     display: grid;
