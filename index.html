@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Comic Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <main class="container">
+        <header>
+            <h1>AI Comic Generator</h1>
+            <p class="subtitle">Enter a simple idea, and the AI will write a story, generate images, and combine them into a unique comic.</p>
+        </header>
+
+        <section class="controls">
+            <textarea id="prompt-input" placeholder="For example: 'A cat who wants to become an astronaut builds a rocket out of cardboard boxes.'"></textarea>
+            <button id="generate-btn">Generate Comic</button>
+        </section>
+
+        <section class="status-section">
+            <p id="status"></p>
+        </section>
+
+        <section id="comic-container" class="comic-container">
+            <!-- Comic panels will be dynamically inserted here by script.js -->
+        </section>
+    </main>
+
+    <!-- The script is placed at the end of the body for faster page load -->
+    <script src="script.js"></script>
+</body>
+</html>
