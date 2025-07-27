@@ -9,7 +9,11 @@ generateButton.addEventListener('click', createComic);
 
 async function createComic() {
     // --- STEP 0: INITIAL SETUP ---
-    const userPrompt = promptInput.value;
+    const userPrompt = "Generate a story world and character descriptions based on the following setting. " +
+                 "The world should include key locations, history, and culture. " +
+                 "Generate 3 distinct characters with physical descriptions. " +
+                 "There is no past yet so keep it empty. " +
+                 "Setting: " + promptInput.value;
     if (!userPrompt || userPrompt.trim() === '') {
         alert('Please enter a story prompt.');
         return;
@@ -39,7 +43,7 @@ async function createComic() {
 
         // --- STEP 2: PREPARE AND REQUEST IMAGES IN PARALLEL ---
         // Extract the "depiction" text from each event in the story.
-        const imageDepictions = story.events.map(event => event.depiction);
+        const imageDepictions = story.events.map(event => "Epic, stunning, cinematic, hyper-realistic art style, sharp, detailed. " + event.depiction);
 
         if (imageDepictions.length === 0) {
             throw new Error("The generated story has no events to create images for.");

@@ -8,6 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Vercel Analytics Scripts -->
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <!-- End Vercel Analytics Scripts -->
+
 </head>
 <body>
 
@@ -27,11 +35,11 @@
         </section>
 
         <section id="comic-container" class="comic-container">
-            <!-- Comic panels will be dynamically inserted here by script.js -->
+            <!-- Comic panels will be dynamically inserted here -->
         </section>
     </main>
 
-    <!-- The script is placed at the end of the body for faster page load -->
+    <!-- The type="module" is no longer needed here -->
     <script src="script.js"></script>
 </body>
 </html>
