@@ -77,7 +77,7 @@ const STORY_SCHEMA = {
             "description": "For each character there should be info (at least 10 characters)",
             "items": {
                 "type": "string",
-                "description": "A depiction of how a character looks, behaives. Mention colors, race, species, gender, apparent age, build/physique, shapes, positions, poses, clothes, hair style, hair color, skin color, eye color, footwear type, objects/weapons, accessories, distinguishing marks/features, expressions, lighting, texture, condition of cloth, overall vibe, and specific stylistic elements (around 150 words)."
+                "description": "A description of how a character looks, behaives. Mention colors, race, species, gender, apparent age, build/physique, shapes, positions, poses, clothes, hair style, hair color, skin color, eye color, footwear type, objects/weapons, accessories, distinguishing marks/features, expressions, lighting, texture, condition of cloth, overall vibe, and specific stylistic elements (around 150 words)."
             }
         },
         "events": {

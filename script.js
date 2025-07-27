@@ -238,7 +238,7 @@ async function checkAndFetchImages() {
         const indicesToFill = [];
 
         // Find the next 5 events that don't have an image yet
-        for (let i = currentEventIndex; i < storyData.events.length && depictionsToFetch.length < 5; i++) {
+        for (let i = currentEventIndex + 1; i < storyData.events.length && depictionsToFetch.length < 5; i++) {
             if (!base64Images[i]) {
                 const style = imageStyleInput.value.trim();
                 depictionsToFetch.push(style + storyData.events[i].depiction);
