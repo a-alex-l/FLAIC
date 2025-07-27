@@ -1,6 +1,6 @@
 /**
  * This function handles POST requests to /api/generate_story
- * It expects a JSON body with "prompt" and an optional "apiKey"
+ * It expects a JSON body with "prompt" and an optional "token"
  * It returns the structured JSON response from the Gemini API
  */
 export default async function handler(request, response) {
@@ -10,15 +10,16 @@ export default async function handler(request, response) {
     }
 
     try {
-        // Now expecting 'prompt' and 'apiKey' from the request body
-        const { prompt, apiKey: clientApiKey } = request.body;
+        // Now expecting 'prompt' and 'key' from the request body
+        const { prompt, token: clientApiKey } = request.body;
 
         if (!prompt) {
             return response.status(400).json({ error: 'Request body must contain a "prompt".' });
         }
 
         // Use the client-provided API key, or fall back to the environment variable.
-        const apiKey = process.env.GEMINI_API_KEY;
+        const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+
         if (!apiKey) {
             console.error('GEMINI_API_KEY is not set in environment variables or provided by the client.');
             return response.status(400).json({ error: 'Server configuration error: API key is missing. Please provide a key.' });
