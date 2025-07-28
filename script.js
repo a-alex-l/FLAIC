@@ -139,7 +139,6 @@ async function generateNextStep(token) {
     // 4. Proactively fetch more content in the background
     // These run in parallel and don't block the UI
     checkAndFetchStoryContinuation(token).catch(console.error);
-    checkAndFetchImages().catch(console.error);
 }
 
 /**
@@ -229,6 +228,7 @@ async function checkAndFetchStoryContinuation(token) {
         storyData.characters = newStoryPart.characters;
         storyData.world_info = newStoryPart.world_info;
         console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
+        checkAndFetchImages().catch(console.error);
     }
 }
 
