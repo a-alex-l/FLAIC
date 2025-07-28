@@ -176,12 +176,12 @@ async function displayCurrentPanel() {
     captionInput.className = 'caption-input';
     captionInput.textContent = event.caption;
     captionInput.addEventListener('input', () => autoResizeTextarea(captionInput));
-    autoResizeTextarea(captionInput);
 
     // Append elements to the container
     panelElement.appendChild(imageElement);
     panelElement.appendChild(captionInput);
     comicContainer.appendChild(panelElement);
+    autoResizeTextarea(captionInput);
 
     // Scroll the new panel into view
     panelElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
