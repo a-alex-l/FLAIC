@@ -147,8 +147,8 @@ async function generateNextStep(token) {
 async function displayCurrentPanel() {
     const event = storyData.events[currentEventIndex];
     if (!event) {
-        generateButton.style.display = 'none'; // Hide button at the end
-        return;
+        await checkAndFetchStoryContinuation(token).catch(console.error);
+        event = storyData.events[currentEventIndex];
     }
     
     const panelElement = document.createElement('div');
@@ -228,7 +228,7 @@ async function checkAndFetchStoryContinuation(token) {
         storyData.characters = newStoryPart.characters;
         storyData.world_info = newStoryPart.world_info;
         console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
-        checkAndFetchImages().catch(console.error);
+        await checkAndFetchImages().catch(console.error);
     }
 }
 
