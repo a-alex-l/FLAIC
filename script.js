@@ -178,7 +178,8 @@ async function displayCurrentPanel(token) {
  * Triggered if fewer than TEXT_HORIZON events are left in the queue.
  */
 async function checkAndFetchStoryContinuation(token) {
-    if (isGenerating) return;
+    if (isGenerating)
+        return;
     isGenerating = true;
     if (storyData.events.length - currentEventIndex <= TEXT_HORIZON) {
         console.log("Requesting story update.");
