@@ -197,12 +197,12 @@ async function checkAndFetchStoryContinuation(token) {
     if (isGenerating) return;
     isGenerating = true;
     if (storyData.events.length - 1 - currentEventIndex <= TEXT_HORIZON) {
-        console.log("Fewer than TEXT_HORIZON events remaining, fetching continuation...");
+        console.log("Requesting story update.");
 
         const storySoFar = { ...storyData, events: [] };
         
         // Get the last TEXT_HORIZON captions as "RECENT_PAST"
-        const recentEvents = storyData.events.slice(compressedEventIndex);
+        const recentEvents = storyData.events.slice(compressedEventIndex, storyData.events.length);
         compressedEventIndex = storyData.events.length;
         const eventData = recentEvents.map(e => e.caption).join('\n');
 
@@ -222,20 +222,20 @@ async function checkAndFetchStoryContinuation(token) {
         });
         
         if (!response.ok) {
-            console.error("Failed to fetch story continuation:", (await response.json()).error);
-            return;
+            console.error("Failed to fetch story update:", (await response.json()).error);
+            isGenerating = false;
+        } else {
+            const newStoryPart = await response.json();
+            // Append new events to our existing story data
+            storyData.events.push(...newStoryPart.events);
+            storyData.past = newStoryPart.past;
+            storyData.characters = newStoryPart.characters;
+            storyData.world_info = newStoryPart.world_info;
+            console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
+            checkAndFetchImages().catch(console.error);
         }
-
-        const newStoryPart = await response.json();
-        // Append new events to our existing story data
-        storyData.events.push(...newStoryPart.events);
-        storyData.past = newStoryPart.past;
-        storyData.characters = newStoryPart.characters;
-        storyData.world_info = newStoryPart.world_info;
-        console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
-        isGenerating = false;
-        checkAndFetchImages().catch(console.error);
     }
+    isGenerating = false;
 }
 
 /**
@@ -253,6 +253,7 @@ async function checkAndFetchImages() {
         const description = storyData.events[i].depiction;
         if (!base64Images[description]) {
             base64Images[description] = "";
+            console.log("Requesting image.");
             const style = imageStyleInput.value.trim();
             const depiction = style + description;
 
@@ -267,10 +268,12 @@ async function checkAndFetchImages() {
                     console.error(`Failed to generate image for index ${description}`);
                     return null;
                 }
+                console.error("Recieved unexpected insted of image.");
                 return res.json();
             })
             .then(data => {
                 if (data) {
+                    console.log("Recieved image.");
                     return { image: data.image, description: description };
                 }
                 return null;
