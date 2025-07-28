@@ -265,10 +265,9 @@ async function checkAndFetchImages() {
             })
             .then(res => {
                 if (!res.ok) {
-                    console.error(`Failed to generate image for index ${description}`);
+                    console.error(`Failed to generate image`);
                     return null;
                 }
-                console.error("Recieved unexpected insted of image.");
                 return res.json();
             })
             .then(data => {
@@ -279,7 +278,7 @@ async function checkAndFetchImages() {
                 return null;
             })
             .catch(err => {
-                console.error(`Error fetching image for index ${description}:`, err);
+                console.error(`Error fetching image:`, err);
                 return null;
             });
             imagePromises.push(promise);
