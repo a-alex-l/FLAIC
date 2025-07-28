@@ -82,7 +82,7 @@ const STORY_SCHEMA = {
         },
         "events": {
             "type": "array",
-            "description": "A sequence of panels that tell a story, similar to a comic strip. (Aim for around 20 events)",        
+            "description": "A sequence of panels that tell a story, similar to a comic strip. (Aim for around 7 events)",        
             "items": {
                 "type": "object",
                 "properties": {
