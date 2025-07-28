@@ -152,7 +152,7 @@ async function displayCurrentPanel(token) {
 
     const imageData = base64Images[event.depiction];
     if (imageData && imageData != "") {
-        imageElement.src = `data:image/jpeg;base64,${imageData}`;
+        imageElement.src = `data:image/webp;base64,${imageData}`;
     } else {
         imageElement.src = "";
         await waitForImage(event.depiction, currentEventIndex);
@@ -288,7 +288,7 @@ function waitForImage(description, eventIndex) {
             if (base64Images[description] && base64Images[description] != "") {
                 const imgElement = document.getElementById(`image-${eventIndex}`);
                 if (imgElement) {
-                    imgElement.src = `data:image/jpeg;base64,${base64Images[description]}`;
+                    imgElement.src = `data:image/webp;base64,${base64Images[description]}`;
                 }
                 clearInterval(intervalId);
                 resolve();

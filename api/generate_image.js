@@ -60,10 +60,7 @@ export default async function handler(request, response) {
 
         // Use sharp to compress the image.
         // - .jpeg() converts the image to JPEG format.
-        // - mozjpeg: true uses an advanced encoder for even better compression.
-        const compressedImageBuffer = await sharp(imageBuffer)
-            .jpeg({ quality: 90 })
-            .toBuffer();
+        const compressedImageBuffer = await sharp(imageBuffer).webp({ quality: 90 }).toBuffer();
 
         // Convert the newly compressed buffer back into a base64 string
         const compressedBase64 = compressedImageBuffer.toString('base64');
