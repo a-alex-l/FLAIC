@@ -24,7 +24,7 @@ generateButton.addEventListener('click', handleGenerateClick);
  * It decides whether to start a new story or generate the next event.
  */
 async function handleGenerateClick() {
-    if (isGenerating) return; // Prevent multiple clicks
+    if (generateButton.disabled) return; // Prevent multiple clicks
     const geminiApiKey = geminiApiKeyInput.value.trim();
     /*if (!geminiApiKey) {
         alert('Please enter your Gemini API Key.');
@@ -32,7 +32,6 @@ async function handleGenerateClick() {
     }*/
     const token = geminiApiKey; // TODO send request to server to crypto API
 
-    isGenerating = true;
     generateButton.disabled = true;
 
     try {
@@ -46,7 +45,6 @@ async function handleGenerateClick() {
     } catch (error) {
         console.error('An error occurred in the main generation flow:', error);
     } finally {
-        isGenerating = false;
         generateButton.disabled = false;
     }
 }
@@ -170,7 +168,7 @@ async function displayCurrentPanel(token) { // <-- Added token parameter
     imageElement.alt = event.depiction; // Alt text is set immediately
 
     const imageData = base64Images[event.depiction];
-    if (imageData) {
+    if (imageData && imageData != "") {
         imageElement.src = `data:image/jpeg;base64,${imageData}`;
     } else {
         imageElement.src = ""; // Placeholder can be a transparent pixel or styled in CSS
@@ -196,6 +194,8 @@ async function displayCurrentPanel(token) { // <-- Added token parameter
  * Triggered if fewer than TEXT_HORIZON events are left in the queue.
  */
 async function checkAndFetchStoryContinuation(token) {
+    if (isGenerating) return;
+    isGenerating = true;
     if (storyData.events.length - 1 - currentEventIndex <= TEXT_HORIZON) {
         console.log("Fewer than TEXT_HORIZON events remaining, fetching continuation...");
 
@@ -233,7 +233,8 @@ async function checkAndFetchStoryContinuation(token) {
         storyData.characters = newStoryPart.characters;
         storyData.world_info = newStoryPart.world_info;
         console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
-        await checkAndFetchImages().catch(console.error);
+        isGenerating = false;
+        checkAndFetchImages().catch(console.error);
     }
 }
 
@@ -251,6 +252,7 @@ async function checkAndFetchImages() {
     for (let i = currentEventIndex + 1; i < endIndex; i++) {
         const description = storyData.events[i].depiction;
         if (!base64Images[description]) {
+            base64Images[description] = "";
             const style = imageStyleInput.value.trim();
             const depiction = style + description;
 
@@ -303,7 +305,7 @@ function waitForImage(description, eventIndex) {
     return new Promise(resolve => {
         let watingCount = 10;
         const intervalId = setInterval(() => {
-            if (base64Images[description]) {
+            if (base64Images[description] && base64Images[description] != "") {
                 const imgElement = document.getElementById(`image-${eventIndex}`);
                 if (imgElement) {
                     imgElement.src = `data:image/jpeg;base64,${base64Images[description]}`;
