@@ -6,6 +6,7 @@ const controlsContainer = document.getElementById('controls-container');
 const geminiApiKeyInput = document.getElementById('gemini-api-key');
 const imageStyleInput = document.getElementById('image-style-prompt');
 
+// --- CONSTANTS ---
 const IMAGE_HORIZON = 3;
 const TEXT_HORIZON = 5;
 
@@ -24,7 +25,8 @@ generateButton.addEventListener('click', handleGenerateClick);
  * It decides whether to start a new story or generate the next event.
  */
 async function handleGenerateClick() {
-    if (generateButton.disabled) return; // Prevent multiple clicks
+    if (generateButton.disabled)
+        return;
     const geminiApiKey = geminiApiKeyInput.value.trim();
     /*if (!geminiApiKey) {
         alert('Please enter your Gemini API Key.');
@@ -36,10 +38,8 @@ async function handleGenerateClick() {
 
     try {
         if (!storyData) {
-            // If there's no story, this is the first click.
             await startNewStory(token);
         } else {
-            // If a story exists, we're generating the next event.
             await generateNextStep(token);
         }
     } catch (error) {
@@ -60,8 +60,7 @@ async function startNewStory(token) {
         throw new Error("Empty prompt.");
     }
     
-    comicContainer.innerHTML = ''; // Clear the comic container
-
+    comicContainer.innerHTML = '';
     const initialPrompt = "Generate a story world and character descriptions based on the following setting. " +
                  "The world should include key locations, history, and culture. " +
                  "Generate 3 distinct characters with physical descriptions. " +
@@ -80,25 +79,19 @@ async function startNewStory(token) {
         console.log("Initial story data received:", storyData);
 
         if (!storyData.events || storyData.events.length === 0) {
-            throw new Error("The AI did not generate any events for the story.");
+            throw new Error("Sorry, AI did not generate any events for the story.");
         }
         
-        // Prepare the UI for the interactive part
-        promptInput.style.display = 'none'; // Hide the initial large textarea
+        promptInput.style.display = 'none';
         generateButton.textContent = 'Generate Next Event';
-
-        // Pre-fetch the first batch of images
         await checkAndFetchImages();
-
-        // Start the sequence by generating the very first step
         await generateNextStep(token);
 
     } catch (error) {
-        // If starting fails, reset to initial state
         storyData = null;
         generateButton.textContent = 'Start Story';
         promptInput.style.display = 'block';
-        throw error; // Re-throw to be caught by the main handler
+        throw error;
     }
 }
 
@@ -106,7 +99,6 @@ async function startNewStory(token) {
  * Generates and displays the next event in the story sequence.
  */
 async function generateNextStep(token) {
-    // 1. Lock in the caption from the PREVIOUS panel (if one exists)
     if (currentEventIndex >= 0) {
         const lastPanel = document.getElementById(`panel-${currentEventIndex}`);
         const captionInput = lastPanel.querySelector('.caption-input');
@@ -117,24 +109,17 @@ async function generateNextStep(token) {
             storyData.events.splice(currentEventIndex + 1);
         }
         
-        // Update the official story data with the user's caption
         storyData.events[currentEventIndex].caption = finalCaption;
 
-        // Replace the input with static text
         const captionText = document.createElement('p');
         captionText.className = 'caption-text';
         captionText.textContent = finalCaption;
         captionInput.replaceWith(captionText);
     }
-    
-    // 2. Move to the next event
     currentEventIndex++;
 
-    // 3. Display the new panel
     await displayCurrentPanel(token);
 
-    // 4. Proactively fetch more content in the background
-    // These run in parallel and don't block the UI
     checkAndFetchStoryContinuation(token).catch(console.error);
     checkAndFetchImages().catch(console.error);
 }
@@ -142,15 +127,13 @@ async function generateNextStep(token) {
 /**
  * Creates and displays the HTML for the current event panel.
  */
-async function displayCurrentPanel(token) { // <-- Added token parameter
+async function displayCurrentPanel(token) {
     let event = storyData.events[currentEventIndex];
     if (!event) {
-        // If we've run out of events, try to fetch more before proceeding
         console.log("No event found at index, attempting to fetch more story...");
         await checkAndFetchStoryContinuation(token);
         event = storyData.events[currentEventIndex];
         
-        // If there's still no event, we can't continue
         if (!event) {
             console.error("Failed to display panel: No event available even after fetch attempt.");
             generateButton.textContent = 'End of Story';
@@ -165,15 +148,14 @@ async function displayCurrentPanel(token) { // <-- Added token parameter
 
     const imageElement = document.createElement('img');
     imageElement.id = `image-${currentEventIndex}`;
-    imageElement.alt = event.depiction; // Alt text is set immediately
+    imageElement.alt = event.depiction;
 
     const imageData = base64Images[event.depiction];
     if (imageData && imageData != "") {
         imageElement.src = `data:image/jpeg;base64,${imageData}`;
     } else {
-        imageElement.src = ""; // Placeholder can be a transparent pixel or styled in CSS
-        // Poll for the image with a timeout
-        await waitForImage(event.depiction, currentEventIndex); // <-- Corrected call
+        imageElement.src = "";
+        await waitForImage(event.depiction, currentEventIndex);
     }
 
     const captionInput = document.createElement('textarea');
@@ -203,7 +185,6 @@ async function checkAndFetchStoryContinuation(token) {
 
         const storySoFar = { ...storyData, events: [] };
         
-        // Get the last TEXT_HORIZON captions as "RECENT_PAST"
         const recentEvents = storyData.events.slice(compressedEventIndex, storyData.events.length);
         compressedEventIndex = storyData.events.length;
         const eventData = recentEvents.map(e => e.caption).join('\n');
@@ -228,7 +209,6 @@ async function checkAndFetchStoryContinuation(token) {
             isGenerating = false;
         } else {
             const newStoryPart = await response.json();
-            // Append new events to our existing story data
             storyData.events.push(...newStoryPart.events);
             storyData.past = newStoryPart.past;
             storyData.characters = newStoryPart.characters;
@@ -245,12 +225,9 @@ async function checkAndFetchStoryContinuation(token) {
  * Triggered if the image for an upcoming panel (IMAGE_HORIZON steps ahead) is missing.
  */
 async function checkAndFetchImages() {
-    // Trigger condition: if we are IMAGE_HORIZON steps away from running out of images
     const imagePromises = [];
-        
     const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
-        
-        // It will now create a fetch promise for EVERY future event that doesn't have an image.
+
     for (let i = currentEventIndex + 1; i < endIndex; i++) {
         const description = storyData.events[i].depiction;
         if (!base64Images[description]) {
@@ -289,9 +266,7 @@ async function checkAndFetchImages() {
         
     if (imagePromises.length === 0) return;
 
-    // Wait for all the individual fetch requests to complete
     const settledImages = await Promise.all(imagePromises);
-
     settledImages.forEach(result => {
         if (result) {
             base64Images[result.description] = result.image;
@@ -318,8 +293,7 @@ function waitForImage(description, eventIndex) {
                 resolve();
                 return;
             }
-            watingCount--;
-            if (watingCount == 0) {
+            if (--watingCount == 0) {
                 console.log(`Timed out waiting for image for event ${eventIndex}. Displaying alt text.`);
                 clearInterval(intervalId);
                 resolve();
@@ -330,6 +304,6 @@ function waitForImage(description, eventIndex) {
 }
 
 function autoResizeTextarea(textarea) {
-    textarea.style.height = 'auto'; // Reset height to recalculate
-    textarea.style.height = textarea.scrollHeight + 'px'; // Set height to scrollHeight
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
 }
