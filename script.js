@@ -11,7 +11,7 @@ const TEXT_HORIZON = 5;
 
 // --- APPLICATION STATE ---
 let storyData = null; // Will hold the entire story object { world_info, characters, events, ... }
-let base64Images = []; // Array to store generated images, can have empty slots
+let base64Images = {}; // Array to store generated images, can have empty slots
 let currentEventIndex = -1; // Index of the event currently being displayed
 let isGenerating = false; // A lock to prevent simultaneous API calls
 let compressedEventIndex = -1; // Index of the event currently being displayed
@@ -30,7 +30,7 @@ async function handleGenerateClick() {
         alert('Please enter your Gemini API Key.');
         return;
     }*/
-   const token = geminiApiKey; // TODO send request to server to crypto API
+    const token = geminiApiKey; // TODO send request to server to crypto API
 
     isGenerating = true;
     generateButton.disabled = true;
@@ -117,7 +117,6 @@ async function generateNextStep(token) {
         if (finalCaption !== storyData.events[currentEventIndex].caption) {
             console.log(`Caption for event ${currentEventIndex} changed. Branching story from this point.`);
             storyData.events.splice(currentEventIndex + 1);
-            base64Images.splice(currentEventIndex + 1);
         }
         
         // Update the official story data with the user's caption
@@ -134,7 +133,7 @@ async function generateNextStep(token) {
     currentEventIndex++;
 
     // 3. Display the new panel
-    await displayCurrentPanel();
+    await displayCurrentPanel(token);
 
     // 4. Proactively fetch more content in the background
     // These run in parallel and don't block the UI
@@ -144,45 +143,50 @@ async function generateNextStep(token) {
 /**
  * Creates and displays the HTML for the current event panel.
  */
-async function displayCurrentPanel() {
-    const event = storyData.events[currentEventIndex];
+async function displayCurrentPanel(token) { // <-- Added token parameter
+    let event = storyData.events[currentEventIndex];
     if (!event) {
-        await checkAndFetchStoryContinuation(token).catch(console.error);
+        // If we've run out of events, try to fetch more before proceeding
+        console.log("No event found at index, attempting to fetch more story...");
+        await checkAndFetchStoryContinuation(token);
         event = storyData.events[currentEventIndex];
+        
+        // If there's still no event, we can't continue
+        if (!event) {
+            console.error("Failed to display panel: No event available even after fetch attempt.");
+            generateButton.textContent = 'End of Story';
+            generateButton.disabled = true;
+            return;
+        }
     }
     
     const panelElement = document.createElement('div');
     panelElement.className = 'comic-panel';
     panelElement.id = `panel-${currentEventIndex}`;
 
-    // Create image element (it might be empty while loading)
     const imageElement = document.createElement('img');
     imageElement.id = `image-${currentEventIndex}`;
-    imageElement.alt = event.depiction;
-    const imageData = base64Images[currentEventIndex];
+    imageElement.alt = event.depiction; // Alt text is set immediately
+
+    const imageData = base64Images[event.depiction];
     if (imageData) {
-        // If the real image is already loaded, display it
         imageElement.src = `data:image/jpeg;base64,${imageData}`;
     } else {
-        // If image isn't ready, show a placeholder and try to load it
-        imageElement.src = ""; // Placeholder can be set in CSS
-        // Poll for the image
-        await waitForImage(currentEventIndex);
+        imageElement.src = ""; // Placeholder can be a transparent pixel or styled in CSS
+        // Poll for the image with a timeout
+        await waitForImage(event.depiction, currentEventIndex); // <-- Corrected call
     }
 
-    // Create editable caption element
     const captionInput = document.createElement('textarea');
     captionInput.className = 'caption-input';
     captionInput.textContent = event.caption;
     captionInput.addEventListener('input', () => autoResizeTextarea(captionInput));
 
-    // Append elements to the container
     panelElement.appendChild(imageElement);
     panelElement.appendChild(captionInput);
     comicContainer.appendChild(panelElement);
     autoResizeTextarea(captionInput);
 
-    // Scroll the new panel into view
     panelElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
@@ -238,70 +242,54 @@ async function checkAndFetchStoryContinuation(token) {
  */
 async function checkAndFetchImages() {
     // Trigger condition: if we are IMAGE_HORIZON steps away from running out of images
-    if (currentEventIndex + IMAGE_HORIZON >= base64Images.length) {
-        console.log("Pre-fetching all available future images individually...");
+    const imagePromises = [];
         
-        const imagePromises = [];
-        
-        const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
+    const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
         
         // It will now create a fetch promise for EVERY future event that doesn't have an image.
-        for (let i = base64Images.length; i < endIndex; i++) {
-            if (!base64Images[i]) {
-                const style = imageStyleInput.value.trim();
-                const depiction = style + storyData.events[i].depiction;
-                const index = i; // Capture the current index
+    for (let i = currentEventIndex + 1; i < endIndex; i++) {
+        const description = storyData.events[i].depiction;
+        if (!base64Images[description]) {
+            const style = imageStyleInput.value.trim();
+            const depiction = style + description;
 
-                // Create a promise for each fetch call
-                const promise = fetch('/api/generate_image', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ depiction: depiction })
-                })
-                .then(res => {
-                    if (!res.ok) {
-                        console.error(`Failed to generate image for index ${index}`);
-                        return null;
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (data) {
-                        return { image: data.image, index: index };
-                    }
+            // Create a promise for each fetch call
+            const promise = fetch('/api/generate_image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ depiction: depiction })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    console.error(`Failed to generate image for index ${description}`);
                     return null;
-                })
-                .catch(err => {
-                    console.error(`Error fetching image for index ${index}:`, err);
-                    return null;
-                });
-
-                imagePromises.push(promise);
-            }
-        }
-        
-        if (imagePromises.length === 0) return;
-
-        // Wait for all the individual fetch requests to complete
-        const settledImages = await Promise.all(imagePromises);
-
-        let fetchCount = 0;
-        settledImages.forEach(result => {
-            if (result) {
-                fetchCount++;
-                base64Images[result.index] = result.image;
-                
-                const imgElement = document.getElementById(`image-${result.index}`);
-                if (imgElement) {
-                    imgElement.src = `data:image/jpeg;base64,${result.image}`;
                 }
-            }
-        });
-
-        if (fetchCount > 0) {
-            console.log(`Fetched and compressed ${fetchCount} new images.`);
+                return res.json();
+            })
+            .then(data => {
+                if (data) {
+                    return { image: data.image, description: description };
+                }
+                return null;
+            })
+            .catch(err => {
+                console.error(`Error fetching image for index ${description}:`, err);
+                return null;
+            });
+            imagePromises.push(promise);
         }
     }
+        
+    if (imagePromises.length === 0) return;
+
+    // Wait for all the individual fetch requests to complete
+    const settledImages = await Promise.all(imagePromises);
+
+    settledImages.forEach(result => {
+        if (result) {
+            base64Images[result.description] = result.image;
+        }
+    });
 }
 
 
@@ -310,16 +298,25 @@ async function checkAndFetchImages() {
 /**
  * A helper to wait for a specific image to become available in the `base64Images` array.
  */
-function waitForImage(index) {
+function waitForImage(description, eventIndex) {
     return new Promise(resolve => {
-        const interval = setInterval(() => {
-            if (base64Images[index]) {
-                const imgElement = document.getElementById(`image-${index}`);
+        let watingCount = 10;
+        const intervalId = setInterval(() => {
+            if (base64Images[description]) {
+                const imgElement = document.getElementById(`image-${eventIndex}`);
                 if (imgElement) {
-                    imgElement.src = `data:image/jpeg;base64,${base64Images[index]}`;
+                    imgElement.src = `data:image/jpeg;base64,${base64Images[description]}`;
                 }
-                clearInterval(interval);
+                clearInterval(intervalId);
                 resolve();
+                return;
+            }
+            watingCount--;
+            if (watingCount == 0) {
+                console.log(`Timed out waiting for image for event ${eventIndex}. Displaying alt text.`);
+                clearInterval(intervalId);
+                resolve();
+                return;
             }
         }, 150);
     });
