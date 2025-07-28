@@ -127,7 +127,7 @@ h1 {
 /* Style for the editable caption input */
 .caption-input {
     width: 100%;
-    min-height: 45px; /* Adjusted: Roughly one line of text + padding */
+    min-height: 20px;
     padding: 10px;
     font-family: inherit;
     font-size: 1rem;
@@ -135,8 +135,8 @@ h1 {
     border: 1px dashed #007bff;
     border-radius: 6px;
     box-sizing: border-box;
-    resize: vertical; /* Allows manual resizing by user */
-    overflow-y: hidden; /* Important: Hides the scrollbar, letting JS control height */
+    resize: vertical;
+    overflow-y: hidden;
 }
 
 /* Style for the final, locked-in caption text */
