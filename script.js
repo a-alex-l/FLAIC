@@ -113,6 +113,12 @@ async function generateNextStep(token) {
         const lastPanel = document.getElementById(`panel-${currentEventIndex}`);
         const captionInput = lastPanel.querySelector('.caption-input');
         const finalCaption = captionInput.value;
+
+        if (finalCaption !== storyData.events[currentEventIndex].caption) {
+            console.log(`Caption for event ${currentEventIndex} changed. Branching story from this point.`);
+            storyData.events.splice(currentEventIndex + 1);
+            base64Images.splice(currentEventIndex + 1);
+        }
         
         // Update the official story data with the user's caption
         storyData.events[currentEventIndex].caption = finalCaption;
@@ -187,7 +193,7 @@ async function checkAndFetchStoryContinuation(token) {
     if (storyData.events.length - 1 - currentEventIndex <= TEXT_HORIZON) {
         console.log("Fewer than TEXT_HORIZON events remaining, fetching continuation...");
 
-        const storySoFar = { ...storyData, events: [] }; // Clone story without events
+        const storySoFar = { ...storyData, events: [] };
         
         // Get the last TEXT_HORIZON captions as "RECENT_PAST"
         const recentEvents = storyData.events.slice(compressedEventIndex);
@@ -313,6 +319,6 @@ function waitForImage(index) {
                 clearInterval(interval);
                 resolve();
             }
-        }, 150); // Check every half a second
+        }, 150);
     });
 }
