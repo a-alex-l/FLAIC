@@ -70,7 +70,7 @@ export default async function handler(request, response) {
         const compressedBase64 = compressedImageBuffer.toString('base64');
 
         // --- Step 3: Send the compressed image back to the client ---
-        console.log(`Image compressed from ${originalBase64.length} to ${compressedBase64.length} bytes.`);
+        console.log(`Compressed ${originalBase64.length}->${compressedBase64.length}`);
         response.status(200).json({ image: compressedBase64 });
 
     } catch (error) {
