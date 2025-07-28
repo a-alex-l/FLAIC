@@ -26,7 +26,7 @@ async function handleGenerateClick() {
         alert('Please enter your Gemini API Key.');
         return;
     }*/
-   const token = geminiApiKey; // TODO: crypt API KEY on server
+   const token = geminiApiKey; // TODO send request to server to crypto API
 
     isGenerating = true;
     generateButton.disabled = true;
@@ -216,54 +216,77 @@ async function checkAndFetchStoryContinuation(token) {
 }
 
 /**
- * Checks if more images are needed and fetches them in a batch.
+ * Checks if more images are needed and fetches them ONE BY ONE.
  * Triggered if the image for an upcoming panel (3 steps ahead) is missing.
  */
 async function checkAndFetchImages() {
-    // Check if we need to fetch images (i.e., the image 3 panels ahead is missing)
+    // Trigger condition: if we are 3 steps away from running out of images
     if (currentEventIndex + 3 >= base64Images.length) {
-        console.log("Prefetching next batch of images...");
+        console.log("Pre-fetching all available future images individually...");
         
-        const depictionsToFetch = [];
-        const indicesToFill = [];
-
-        // Find the next 5 events that don't have an image yet
-        for (let i = currentEventIndex + 1; i < storyData.events.length && depictionsToFetch.length < 5; i++) {
+        const imagePromises = [];
+        
+        const startIndex = Math.max(0, currentEventIndex);
+        
+        // It will now create a fetch promise for EVERY future event that doesn't have an image.
+        for (let i = startIndex; i < storyData.events.length; i++) {
             if (!base64Images[i]) {
                 const style = imageStyleInput.value.trim();
-                depictionsToFetch.push(style + storyData.events[i].depiction);
-                indicesToFill.push(i);
+                const depiction = style + storyData.events[i].depiction;
+                const index = i; // Capture the current index
+
+                // Create a promise for each fetch call
+                const promise = fetch('/api/generate_image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ depiction: depiction })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        console.error(`Failed to generate image for index ${index}`);
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data) {
+                        return { image: data.image, index: index };
+                    }
+                    return null;
+                })
+                .catch(err => {
+                    console.error(`Error fetching image for index ${index}:`, err);
+                    return null;
+                });
+
+                imagePromises.push(promise);
             }
         }
         
-        if (depictionsToFetch.length === 0) return; // Nothing to fetch
+        if (imagePromises.length === 0) return;
 
-        const response = await fetch('/api/generate_images', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ depictions: depictionsToFetch })
-        });
+        // Wait for all the individual fetch requests to complete
+        const settledImages = await Promise.all(imagePromises);
 
-        if (!response.ok) {
-            console.error("Failed to fetch images:", (await response.json()).error);
-            return;
-        }
-
-        const imageData = await response.json();
-        // Place the new images into their correct slots in the main array
-        imageData.images.forEach((img, i) => {
-            const originalIndex = indicesToFill[i];
-            base64Images[originalIndex] = img;
-            
-            // If the image element already exists on the page, update its src
-            const imgElement = document.getElementById(`image-${originalIndex}`);
-            if (imgElement) {
-                imgElement.src = `data:image/jpeg;base64,${img}`;
+        let fetchCount = 0;
+        settledImages.forEach(result => {
+            if (result) {
+                fetchCount++;
+                base64Images[result.index] = result.image;
+                
+                const imgElement = document.getElementById(`image-${result.index}`);
+                if (imgElement) {
+                    imgElement.src = `data:image/jpeg;base64,${result.image}`;
+                }
             }
         });
-        console.log(`Fetched ${imageData.images.length} new images.`);
+
+        if (fetchCount > 0) {
+            console.log(`Fetched and compressed ${fetchCount} new images.`);
+        }
     }
 }
+
 
 // --- HELPER FUNCTIONS ---
 
@@ -281,6 +304,6 @@ function waitForImage(index) {
                 clearInterval(interval);
                 resolve();
             }
-        }, 500); // Check every half a second
+        }, 150); // Check every half a second
     });
 }
