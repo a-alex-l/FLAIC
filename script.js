@@ -8,7 +8,6 @@ const imageStyleInput = document.getElementById('image-style-prompt');
 
 const IMAGE_HORIZON = 3;
 const TEXT_HORIZON = 5;
-const BLACK_IMAGE_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 // --- APPLICATION STATE ---
 let storyData = null; // Will hold the entire story object { world_info, characters, events, ... }
@@ -156,7 +155,7 @@ async function displayCurrentPanel() {
     imageElement.id = `image-${currentEventIndex}`;
     imageElement.alt = event.depiction;
     const imageData = base64Images[currentEventIndex];
-    if (imageData && imageData !== BLACK_IMAGE_BASE64) {
+    if (imageData) {
         // If the real image is already loaded, display it
         imageElement.src = `data:image/jpeg;base64,${imageData}`;
     } else {
@@ -236,13 +235,11 @@ async function checkAndFetchImages() {
         
         const imagePromises = [];
         
-        const startIndex = Math.max(0, currentEventIndex);
         const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
         
         // It will now create a fetch promise for EVERY future event that doesn't have an image.
-        for (let i = startIndex; i < endIndex; i++) {
+        for (let i = base64Images.length; i < endIndex; i++) {
             if (!base64Images[i]) {
-                base64Images[i] = BLACK_IMAGE_BASE64;
                 const style = imageStyleInput.value.trim();
                 const depiction = style + storyData.events[i].depiction;
                 const index = i; // Capture the current index
