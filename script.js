@@ -14,7 +14,7 @@ let storyData = null; // Will hold the entire story object { world_info, charact
 let base64Images = {}; // Array to store generated images, can have empty slots
 let currentEventIndex = -1; // Index of the event currently being displayed
 let isGenerating = false; // A lock to prevent simultaneous API calls
-let compressedEventIndex = -1; // Index of the event currently being displayed
+let compressedEventIndex = 0; // Index of the event currently being displayed
 
 // --- EVENT LISTENERS ---
 generateButton.addEventListener('click', handleGenerateClick);
@@ -198,7 +198,7 @@ async function displayCurrentPanel(token) { // <-- Added token parameter
 async function checkAndFetchStoryContinuation(token) {
     if (isGenerating) return;
     isGenerating = true;
-    if (storyData.events.length - 1 - currentEventIndex <= TEXT_HORIZON) {
+    if (storyData.events.length - currentEventIndex <= TEXT_HORIZON) {
         console.log("Requesting story update.");
 
         const storySoFar = { ...storyData, events: [] };
@@ -234,7 +234,7 @@ async function checkAndFetchStoryContinuation(token) {
             storyData.characters = newStoryPart.characters;
             storyData.world_info = newStoryPart.world_info;
             console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
-            checkAndFetchImages().catch(console.error);
+            await checkAndFetchImages().catch(console.error);
         }
     }
     isGenerating = false;
