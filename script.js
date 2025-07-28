@@ -175,6 +175,8 @@ async function displayCurrentPanel() {
     const captionInput = document.createElement('textarea');
     captionInput.className = 'caption-input';
     captionInput.textContent = event.caption;
+    captionInput.addEventListener('input', () => autoResizeTextarea(captionInput));
+    autoResizeTextarea(captionInput);
 
     // Append elements to the container
     panelElement.appendChild(imageElement);
