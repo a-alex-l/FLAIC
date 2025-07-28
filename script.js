@@ -6,11 +6,16 @@ const controlsContainer = document.getElementById('controls-container');
 const geminiApiKeyInput = document.getElementById('gemini-api-key');
 const imageStyleInput = document.getElementById('image-style-prompt');
 
+const IMAGE_HORIZON = 3;
+const TEXT_HORIZON = 5;
+const BLACK_IMAGE_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
 // --- APPLICATION STATE ---
 let storyData = null; // Will hold the entire story object { world_info, characters, events, ... }
 let base64Images = []; // Array to store generated images, can have empty slots
 let currentEventIndex = -1; // Index of the event currently being displayed
 let isGenerating = false; // A lock to prevent simultaneous API calls
+let compressedEventIndex = -1; // Index of the event currently being displayed
 
 // --- EVENT LISTENERS ---
 generateButton.addEventListener('click', handleGenerateClick);
@@ -150,8 +155,10 @@ async function displayCurrentPanel() {
     const imageElement = document.createElement('img');
     imageElement.id = `image-${currentEventIndex}`;
     imageElement.alt = event.depiction;
-    if (base64Images[currentEventIndex]) {
-        imageElement.src = `data:image/jpeg;base64,${base64Images[currentEventIndex]}`;
+    const imageData = base64Images[currentEventIndex];
+    if (imageData && imageData !== BLACK_IMAGE_BASE64) {
+        // If the real image is already loaded, display it
+        imageElement.src = `data:image/jpeg;base64,${imageData}`;
     } else {
         // If image isn't ready, show a placeholder and try to load it
         imageElement.src = ""; // Placeholder can be set in CSS
@@ -175,16 +182,17 @@ async function displayCurrentPanel() {
 
 /**
  * Checks if more story events are needed and fetches them.
- * Triggered if fewer than 6 events are left in the queue.
+ * Triggered if fewer than TEXT_HORIZON events are left in the queue.
  */
 async function checkAndFetchStoryContinuation(token) {
-    if (storyData.events.length - 1 - currentEventIndex < 6) {
-        console.log("Fewer than 6 events remaining, fetching continuation...");
+    if (storyData.events.length - 1 - currentEventIndex <= TEXT_HORIZON) {
+        console.log("Fewer than TEXT_HORIZON events remaining, fetching continuation...");
 
         const storySoFar = { ...storyData, events: [] }; // Clone story without events
         
-        // Get the last 5 captions as "RECENT_PAST"
-        const recentEvents = storyData.events.slice(-5);
+        // Get the last TEXT_HORIZON captions as "RECENT_PAST"
+        const recentEvents = storyData.events.slice(compressedEventIndex);
+        compressedEventIndex = storyData.events.length;
         const eventData = recentEvents.map(e => e.caption).join('\n');
 
         const continuationPrompt = "As a creative writer, your task is to write the next part of the story" +
@@ -210,27 +218,31 @@ async function checkAndFetchStoryContinuation(token) {
         const newStoryPart = await response.json();
         // Append new events to our existing story data
         storyData.events.push(...newStoryPart.events);
-        storyData.past = newStoryPart.past; // Update the past
+        storyData.past = newStoryPart.past;
+        storyData.characters = newStoryPart.characters;
+        storyData.world_info = newStoryPart.world_info;
         console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
     }
 }
 
 /**
  * Checks if more images are needed and fetches them ONE BY ONE.
- * Triggered if the image for an upcoming panel (3 steps ahead) is missing.
+ * Triggered if the image for an upcoming panel (IMAGE_HORIZON steps ahead) is missing.
  */
 async function checkAndFetchImages() {
-    // Trigger condition: if we are 3 steps away from running out of images
-    if (currentEventIndex + 3 >= base64Images.length) {
+    // Trigger condition: if we are IMAGE_HORIZON steps away from running out of images
+    if (currentEventIndex + IMAGE_HORIZON >= base64Images.length) {
         console.log("Pre-fetching all available future images individually...");
         
         const imagePromises = [];
         
         const startIndex = Math.max(0, currentEventIndex);
+        const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
         
         // It will now create a fetch promise for EVERY future event that doesn't have an image.
-        for (let i = startIndex; i < storyData.events.length; i++) {
+        for (let i = startIndex; i < endIndex; i++) {
             if (!base64Images[i]) {
+                base64Images[i] = BLACK_IMAGE_BASE64;
                 const style = imageStyleInput.value.trim();
                 const depiction = style + storyData.events[i].depiction;
                 const index = i; // Capture the current index
