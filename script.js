@@ -186,7 +186,9 @@ async function displayCurrentPanel(token) { // <-- Added token parameter
     comicContainer.appendChild(panelElement);
     autoResizeTextarea(captionInput);
 
-    panelElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    requestAnimationFrame(() => {
+        panelElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
 }
 
 /**
