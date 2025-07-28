@@ -324,3 +324,8 @@ function waitForImage(index) {
         }, 150);
     });
 }
+
+function autoResizeTextarea(textarea) {
+    textarea.style.height = 'auto'; // Reset height to recalculate
+    textarea.style.height = textarea.scrollHeight + 'px'; // Set height to scrollHeight
+}
