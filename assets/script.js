@@ -261,7 +261,7 @@ async function checkAndFetchImages(apiKey) {
             .then(data => {
                 if (data) {
                     console.log("Recieved image.");
-                    return { image: data.image, description: description };
+                    return { image: data.image, depiction: depiction };
                 }
                 return null;
             })
@@ -278,7 +278,7 @@ async function checkAndFetchImages(apiKey) {
     const settledImages = await Promise.all(imagePromises);
     settledImages.forEach(result => {
         if (result) {
-            base64Images[result.description] = result.image;
+            base64Images[result.depiction] = result.image;
         }
     });
 }
@@ -289,14 +289,14 @@ async function checkAndFetchImages(apiKey) {
 /**
  * A helper to wait for a specific image to become available in the `base64Images` array.
  */
-function waitForImage(description, eventIndex) {
+function waitForImage(depiction, eventIndex) {
     return new Promise(resolve => {
         let watingCount = 10;
         const intervalId = setInterval(() => {
-            if (base64Images[description] && base64Images[description] != "") {
+            if (base64Images[depiction] && base64Images[depiction] != "") {
                 const imgElement = document.getElementById(`image-${eventIndex}`);
                 if (imgElement) {
-                    imgElement.src = `data:image/webp;base64,${base64Images[description]}`;
+                    imgElement.src = `data:image/webp;base64,${base64Images[depiction]}`;
                 }
                 clearInterval(intervalId);
                 resolve();
