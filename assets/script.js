@@ -291,7 +291,7 @@ async function checkAndFetchImages(apiKey) {
  */
 function waitForImage(depiction, eventIndex) {
     return new Promise(resolve => {
-        let watingCount = 10;
+        let watingCount = 100;
         const intervalId = setInterval(() => {
             if (base64Images[depiction] && base64Images[depiction] != "") {
                 const imgElement = document.getElementById(`image-${eventIndex}`);

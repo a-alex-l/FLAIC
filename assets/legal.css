@@ -1,0 +1,25 @@
+.back-link {
+  color: #007bff; /* Sets the text color to a vibrant blue */
+  text-decoration: none; /* Optional: Removes the default underline */
+}
+
+.back-link:hover {
+  color: #0056b3; /* Darkens the blue when the mouse is over it */
+  text-decoration: underline; /* Adds the underline back on hover */
+}
+
+.back-link:visited {
+  color: #b392f0; /* A light purple, easily visible on a dark background */
+}
+
+.legal-content {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
