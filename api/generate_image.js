@@ -25,9 +25,9 @@ export default async function handler(request, response) {
 
         let pngBase64;
         if (service === "tensorOpera") {
-            originalBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 20, 2);
+            pngBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 20, 2);
         } else if (service === "gemini") {
-            originalBase64 = await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 256, 256, 20, 2);
+            pngBase64 = await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 256, 256, 20, 2);
         } else {
             return response.status(400).json({ error: `Unknown service: "${service}". Supported services are "tensorOpera" and "gemini".` });
         }
