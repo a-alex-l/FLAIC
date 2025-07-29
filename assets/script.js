@@ -254,6 +254,7 @@ async function checkAndFetchImages(apiKey) {
             .then(res => {
                 if (!res.ok) {
                     console.error(`Failed to generate image`);
+                    base64Images[depiction] != "Failed";
                     return null;
                 }
                 return res.json();
@@ -267,6 +268,7 @@ async function checkAndFetchImages(apiKey) {
             })
             .catch(err => {
                 console.error(`Error fetching image:`, err);
+                base64Images[depiction] != "Failed";
                 return null;
             });
             imagePromises.push(promise);
@@ -295,7 +297,7 @@ function waitForImage(depiction, eventIndex) {
         const intervalId = setInterval(() => {
             if (base64Images[depiction] && base64Images[depiction] != "") {
                 const imgElement = document.getElementById(`image-${eventIndex}`);
-                if (imgElement) {
+                if (imgElement && base64Images[depiction] != "Failed") {
                     imgElement.src = `data:image/webp;base64,${base64Images[depiction]}`;
                 }
                 clearInterval(intervalId);
