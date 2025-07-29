@@ -25,9 +25,9 @@
 .footer-section h3 {
     color: #007bff;
     font-size: 18px;
-    margin-bottom: 10px; /* Немного увеличим отступ */
+    margin-bottom: 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 5px; /* Немного увеличим отступ */
+    padding-bottom: 5px;
 }
 
 .footer-section ul {
@@ -54,8 +54,8 @@
 .footer-copyright {
     text-align: center;
     flex-basis: 100%;
-    margin-top: 20px; /* Добавим отступ сверху */
-    padding-top: 15px; /* Увеличим отступ сверху */
+    margin-top: 20px;
+    padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 13px;
     color: #aaa;
@@ -77,7 +77,7 @@
 
 .legal-content {
   max-width: 800px;
-  margin: 40px auto; /* Center it on the page */
+  margin: 40px auto;
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
