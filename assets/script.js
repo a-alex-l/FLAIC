@@ -61,6 +61,8 @@ async function startNewStory(textApiKey, imageApiKey) {
         throw new Error("Empty prompt.");
     }
     
+    const service = "gemini";
+    const model = "gemini-2.5-flash";
     comicContainer.innerHTML = '';
     const initialPrompt = "Generate a story world and character descriptions based on the following setting. " +
                  "The world should include key locations, history, and culture. " +
@@ -72,7 +74,7 @@ async function startNewStory(textApiKey, imageApiKey) {
         const response = await fetch('/api/generate_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: initialPrompt, apiKey: textApiKey })
+            body: JSON.stringify({ service: service, apiKey: textApiKey, model: model, prompt: initialPrompt, apiKey: textApiKey })
         });
         if (!response.ok) throw new Error(`Story generation failed: ${ (await response.json()).error }`);
         
@@ -182,6 +184,8 @@ async function checkAndFetchStoryContinuation(textApiKey, imageApiKey) {
     if (isGenerating)
         return;
     isGenerating = true;
+    const service = "gemini";
+    const model = "gemini-2.5-flash";
     if (storyData.events.length - currentEventIndex <= TEXT_HORIZON) {
         console.log("Requesting story update.");
 
@@ -203,7 +207,7 @@ async function checkAndFetchStoryContinuation(textApiKey, imageApiKey) {
         const response = await fetch('/api/generate_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: continuationPrompt, apiKey: textApiKey })
+            body: JSON.stringify({ service: service, apiKey: textApiKey, model: model, prompt: continuationPrompt })
         });
         
         if (!response.ok) {
