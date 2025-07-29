@@ -40,10 +40,11 @@ export async function generateGeminiImage(apiKey,
         throw new Error(responseData.error?.message || 'Failed to generate image from Gemini.');
     }
 
-    const imagePart = responseData.candidates[0]?.content?.parts?.find(part => part.hasOwnProperty('data'));
-    if (!imagePart || !imagePart.data) {
+    const imagePart = responseData.candidates[0]?.content?.parts?.find(part => part.hasOwnProperty('inlineData'));
+    if (!imagePart || !imagePart.inlineData || !imagePart.inlineData.data) {
+        console.error('Gemini API Error: inlineData or data property not found in the response part.', responseData);
         throw new Error('Image data not found in Gemini response.');
     }
 
-    return imagePart.data;
+    return imagePart.inlineData.data;
 }
