@@ -22,7 +22,7 @@ export async function generateGeminiImage(apiKey,
 
     const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const requestBody = {
-        "contents": [{ "parts": [{ "text": "Generate an image for prompt:\n" + prompt }] }],
+        "contents": [{ "parts": [{ "text": `Generate an image with width = ${width} and hight = ${hight}:\n` + prompt }] }],
         "generationConfig": {
             "responseModalities": ["TEXT", "IMAGE"]
         }
