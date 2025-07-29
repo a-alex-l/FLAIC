@@ -1,42 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Comic Generator</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script>
-      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-</head>
-<body>
+---
+layout: base.html
+---
 
-    <main class="container">
-        <header>
-            <h1>AI Comic Generator</h1>
-            <p class="subtitle">Create an interactive story. Start with an idea, and then guide the narrative one step at a time.</p>
-        </header>
+<main class="container">
+    <header>
+        <p class="subtitle">Create an interactive story. Start with an idea, and then guide the narrative one step at a time.</p>
+    </header>
 
-        <section class="top-controls">
-             <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API Key here to get better generations">
-             <input type="text" id="image-style-prompt" placeholder="Default Style: Epic, cinematic, hyper-realistic art style..." value="Epic, stunning, cinematic, hyper-realistic art style, sharp, detailed. ">
-        </section>
+    <section class="top-controls">
+         <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API Key here to get better generations">
+         <input type="text" id="image-style-prompt" placeholder="Default Style: Epic, cinematic, hyper-realistic art style..." value="Epic, stunning, cinematic, hyper-realistic art style, sharp, detailed. ">
+    </section>
 
-        <section id="comic-container" class="comic-container">
-            <!-- Comic panels will be dynamically inserted here -->
-        </section>
+    <section id="comic-container" class="comic-container">
+        <!-- Comic panels will be dynamically inserted here -->
+    </section>
 
-        <!-- The main controls are now at the bottom -->
-        <section id="controls-container" class="controls">
-            <textarea id="prompt-input" placeholder="Start your story here. For example: 'A cat who wants to become an astronaut builds a rocket out of cardboard boxes.'"></textarea>
-            <button id="generate-btn">Start Story</button>
-        </section>
-    </main>
-
-    <script src="script.js"></script>
-</body>
-</html>
+    <section id="controls-container" class="controls">
+        <textarea id="prompt-input" placeholder="Start your story here. For example: 'A cat who wants to become an astronaut builds a rocket out of cardboard boxes.'"></textarea>
+        <button id="generate-btn">Start Story</button>
+    </section>
+</main>
