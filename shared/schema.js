@@ -1,6 +1,4 @@
-
-
-const STORY_SCHEMA = {
+export const STORY_SCHEMA = {
     "type": "object",
     "properties": {
         "world_info": {
