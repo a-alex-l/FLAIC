@@ -1,6 +1,6 @@
 /**
  * This function handles POST requests to /api/generate_story
- * It expects a JSON body with "prompt" and an optional "token"
+ * It expects a JSON body with "prompt" and an optional "apiKey"
  * It returns the structured JSON response from the Gemini API
  */
 export default async function handler(request, response) {
@@ -11,7 +11,7 @@ export default async function handler(request, response) {
 
     try {
         // Now expecting 'prompt' and 'key' from the request body
-        const { prompt, token: clientApiKey } = request.body;
+        const { prompt, apiKey: clientApiKey } = request.body;
 
         if (!prompt) {
             return response.status(400).json({ error: 'Request body must contain a "prompt".' });

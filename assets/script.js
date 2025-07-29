@@ -28,19 +28,20 @@ async function handleGenerateClick() {
     if (generateButton.disabled)
         return;
     const geminiApiKey = geminiApiKeyInput.value.trim();
-    /*if (!geminiApiKey) {
+    if (!geminiApiKey) {
         alert('Please enter your Gemini API Key.');
         return;
-    }*/
-    const token = geminiApiKey; // TODO send request to server to crypto API
+    }
+    const textApiKey = geminiApiKey;
+    const imageApiKey = geminiApiKey;
 
     generateButton.disabled = true;
 
     try {
         if (!storyData) {
-            await startNewStory(token);
+            await startNewStory(textApiKey, imageApiKey);
         } else {
-            await generateNextStep(token);
+            await generateNextStep(textApiKey, imageApiKey);
         }
     } catch (error) {
         console.error('An error occurred in the main generation flow:', error);
@@ -53,7 +54,7 @@ async function handleGenerateClick() {
  * STEP 1: Starts a brand new story.
  * Called only on the very first "Start Story" click.
  */
-async function startNewStory(token) {
+async function startNewStory(textApiKey, imageApiKey) {
     const userPromptText = promptInput.value.trim();
     if (!userPromptText) {
         alert('Please enter a story prompt.');
@@ -71,7 +72,7 @@ async function startNewStory(token) {
         const response = await fetch('/api/generate_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: initialPrompt, token: token })
+            body: JSON.stringify({ prompt: initialPrompt, apiKey: textApiKey })
         });
         if (!response.ok) throw new Error(`Story generation failed: ${ (await response.json()).error }`);
         
@@ -84,8 +85,8 @@ async function startNewStory(token) {
         
         promptInput.style.display = 'none';
         generateButton.textContent = 'Generate Next Event';
-        await checkAndFetchImages();
-        await generateNextStep(token);
+        await checkAndFetchImages(imageApiKey);
+        await generateNextStep(textApiKey);
 
     } catch (error) {
         storyData = null;
@@ -98,7 +99,7 @@ async function startNewStory(token) {
 /**
  * Generates and displays the next event in the story sequence.
  */
-async function generateNextStep(token) {
+async function generateNextStep(textApiKey, imageApiKey) {
     if (currentEventIndex >= 0) {
         const lastPanel = document.getElementById(`panel-${currentEventIndex}`);
         const captionInput = lastPanel.querySelector('.caption-input');
@@ -118,20 +119,20 @@ async function generateNextStep(token) {
     }
     currentEventIndex++;
 
-    await displayCurrentPanel(token);
+    await displayCurrentPanel(textApiKey, imageApiKey);
 
-    checkAndFetchStoryContinuation(token).catch(console.error);
-    checkAndFetchImages().catch(console.error);
+    checkAndFetchStoryContinuation(textApiKey, imageApiKey).catch(console.error);
+    checkAndFetchImages(imageApiKey).catch(console.error);
 }
 
 /**
  * Creates and displays the HTML for the current event panel.
  */
-async function displayCurrentPanel(token) {
+async function displayCurrentPanel(textApiKey, imageApiKey) {
     let event = storyData.events[currentEventIndex];
     if (!event) {
         console.log("No event found at index, attempting to fetch more story...");
-        await checkAndFetchStoryContinuation(token);
+        await checkAndFetchStoryContinuation(textApiKey, imageApiKey);
         event = storyData.events[currentEventIndex];
         
         if (!event) {
@@ -177,7 +178,7 @@ async function displayCurrentPanel(token) {
  * Checks if more story events are needed and fetches them.
  * Triggered if fewer than TEXT_HORIZON events are left in the queue.
  */
-async function checkAndFetchStoryContinuation(token) {
+async function checkAndFetchStoryContinuation(textApiKey, imageApiKey) {
     if (isGenerating)
         return;
     isGenerating = true;
@@ -202,7 +203,7 @@ async function checkAndFetchStoryContinuation(token) {
         const response = await fetch('/api/generate_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: continuationPrompt, token: token })
+            body: JSON.stringify({ prompt: continuationPrompt, apiKey: textApiKey })
         });
         
         if (!response.ok) {
@@ -215,7 +216,7 @@ async function checkAndFetchStoryContinuation(token) {
             storyData.characters = newStoryPart.characters;
             storyData.world_info = newStoryPart.world_info;
             console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
-            await checkAndFetchImages().catch(console.error);
+            await checkAndFetchImages(imageApiKey).catch(console.error);
         }
     }
     isGenerating = false;
@@ -225,23 +226,26 @@ async function checkAndFetchStoryContinuation(token) {
  * Checks if more images are needed and fetches them ONE BY ONE.
  * Triggered if the image for an upcoming panel (IMAGE_HORIZON steps ahead) is missing.
  */
-async function checkAndFetchImages() {
+async function checkAndFetchImages(apiKey) {
+    const service = "gemini";
+    const model = "gemini-2.0-flash-preview-image-generation";
     const imagePromises = [];
     const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
 
     for (let i = currentEventIndex + 1; i < endIndex; i++) {
-        const description = storyData.events[i].depiction;
-        if (!base64Images[description]) {
-            base64Images[description] = "";
+        const depiction = storyData.events[i].depiction;
+        if (!base64Images[depiction]) {
+            base64Images[depiction] = "";
             console.log("Requesting image.");
             const style = imageStyleInput.value.trim();
-            const depiction = style + description;
+            const prompt = style + depiction;
 
             // Create a promise for each fetch call
             const promise = fetch('/api/generate_image', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ depiction: depiction })
+                body: JSON.stringify({ service: service, apiKey: apiKey,
+                                       model: model, prompt: prompt })
             })
             .then(res => {
                 if (!res.ok) {
