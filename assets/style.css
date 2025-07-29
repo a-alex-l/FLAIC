@@ -11,8 +11,7 @@ body {
 /* --- Main Layout Container --- */
 .container {
     max-width: 800px;
-    margin: 0 auto;
-    margin: 2rem;
+    margin: 1rem auto;
     background-color: #ffffff;
     padding: 0.75rem;
     border-radius: 15px;
