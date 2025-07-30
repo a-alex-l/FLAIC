@@ -28,12 +28,12 @@ async function handleGenerateClick() {
     if (generateButton.disabled)
         return;
     const geminiApiKey = geminiApiKeyInput.value.trim();
-    if (!geminiApiKey) {
+    /*if (!geminiApiKey) {
         alert('Please enter your Gemini API Key.');
         return;
-    }
-    const textApiKey = geminiApiKey;
-    const imageApiKey = geminiApiKey;
+    }*/
+    const textApiKey = geminiApiKey || "4";
+    const imageApiKey = geminiApiKey || "4";
 
     generateButton.disabled = true;
 
