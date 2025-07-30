@@ -1,14 +1,12 @@
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("assets");
+  eleventyConfig.addPassthroughCopy("style");
   eleventyConfig.addPassthroughCopy("api");
+  eleventyConfig.addPassthroughCopy("script.js");
 
   eleventyConfig.addExtension("html", {
     key: "njk", 
     engine: "html",
-  });
-
-  eleventyConfig.addGlobalData("eleventyComputed.permalink", function() {
-    return (data) => `${data.page.filePathStem}.html`;
   });
 
   return {
