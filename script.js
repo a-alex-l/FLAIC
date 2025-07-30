@@ -1,7 +1,7 @@
-import { generateGeminiText } from 'shared/generate_gemini_text.js';
+import { generateGeminiText } from './shared/generate_gemini_text.js';
 
-import { generateTensorOperaImage } from 'shared/generate_tensoropera_image.js';
-import { generateGeminiImage } from 'shared/generate_gemini_image.js';
+import { generateTensorOperaImage } from './shared/generate_tensoropera_image.js';
+import { generateGeminiImage } from './shared/generate_gemini_image.js';
 
 
 // --- DOM ELEMENT REFERENCES ---
