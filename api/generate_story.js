@@ -3,7 +3,7 @@ import { generateGeminiText } from '../shared/generate_gemini_text.js';
 
 /*
  * This function handles POST requests to /api/generate_story
- * It expects a JSON body with "service", "apiKey", "model", and "prompt".
+ * It expects a JSON body with "service", "apiKey", and "prompt".
  * Example: { "service": "tensorOpera", "apiKey": "your_api_key", "model": "model_name", "prompt": "a cat" }
  * It returns a JSON object.
  */
@@ -14,10 +14,11 @@ export default async function handler(request, response) {
     }
     
     try {
-        const { service, apiKey, model, prompt } = request.body;
+        const { service, apiKey, prompt } = request.body;
+        const model = "gemini-2.0-flash-lite";
         if (!service || typeof service !== 'string' || !apiKey || typeof apiKey !== 'string' ||
-            !model || typeof model !== 'string' || !prompt || typeof prompt !== 'string') {
-            return response.status(400).json({ error: 'Request body must include "service", "model", "apiKey" and "prompt".' });
+                    !prompt || typeof prompt !== 'string') {
+            return response.status(400).json({ error: 'Request body must include "service", "apiKey" and "prompt".' });
         }
 
         if (service === "gemini") {

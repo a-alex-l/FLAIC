@@ -231,7 +231,7 @@ async function checkAndFetchStoryContinuation(textApiKey, imageApiKey) {
  * Triggered if the image for an upcoming panel (IMAGE_HORIZON steps ahead) is missing.
  */
 async function checkAndFetchImages(apiKey) {
-    const service = "gemini";
+    const service = "tensorOpera";
     const model = "gemini-2.0-flash-preview-image-generation";
     const imagePromises = [];
     const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);

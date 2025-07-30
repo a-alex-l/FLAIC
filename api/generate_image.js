@@ -4,8 +4,8 @@ import { generateGeminiImage } from '../shared/generate_gemini_image.js';
 
 /*
  * This function handles POST requests to /api/generate_image
- * It expects a JSON body with "service", "apiKey", "model", and "prompt".
- * Example: { "service": "tensorOpera", "apiKey": "your_api_key", "model": "model_name", "prompt": "a cat" }
+ * It expects a JSON body with "service", "apiKey", and "prompt".
+ * Example: { "service": "tensorOpera", "apiKey": "your_api_key": "model_name", "prompt": "a cat" }
  * It returns a JSON object with a single compressed, base64 encoded "image".
  */
 import sharp from 'sharp';
@@ -19,15 +19,15 @@ export default async function handler(request, response) {
     try {
         const { service, apiKey, prompt } = request.body;
         if (!service || typeof service !== 'string' || !apiKey || typeof apiKey !== 'string' ||
-            !prompt || typeof prompt !== 'string') {
-            return response.status(400).json({ error: 'Request body must include "service", "model", "apiKey" and "prompt".' });
+                    !prompt || typeof prompt !== 'string') {
+            return response.status(400).json({ error: 'Request body must include "service", "apiKey" and "prompt".' });
         }
 
         let pngBase64;
         if (service === "tensorOpera") {
-            pngBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 20, 2);
+            pngBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 10, 2);
         } else if (service === "gemini") {
-            pngBase64 = await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 256, 256, 20, 2);
+            pngBase64 = await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 256, 256, 10, 2);
         } else {
             return response.status(400).json({ error: `Unknown service: "${service}". Supported services are "tensorOpera" and "gemini".` });
         }
