@@ -1,5 +1,5 @@
 # Current Tasks:
-* Add local API accsess to lower proxy load
+* Add local API for images accsess to lower proxy load
 * Add image size, steps cound and guidance settings
 * Add Reset Button
 * Make a Play Store build
