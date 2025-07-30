@@ -93,10 +93,7 @@ async function startNewStory(textApiKey, imageApiKey) {
             }
             newStoryStart = await response.json();
         }
-        
-        newStoryStart = await response.json();
         console.log("Initial story data received:", newStoryStart);
-
         if (!newStoryStart.events || newStoryStart.events.length === 0) {
             throw new Error("Sorry, AI did not generate any events for the story.");
         }
