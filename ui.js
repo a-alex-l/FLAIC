@@ -32,8 +32,6 @@ const IMAGE_PROVIDERS = {
     }
 };
 
-
-
 // --- INITIALIZATION ---
 generateButton.addEventListener('click', handleGenerateClick);
 
