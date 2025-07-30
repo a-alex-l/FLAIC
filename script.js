@@ -244,7 +244,6 @@ async function checkAndFetchImages(apiKey) {
             const style = imageStyleInput.value.trim();
             const prompt = style + depiction;
 
-            // Create a promise for each fetch call
             const promise = fetch('/api/generate_image', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
