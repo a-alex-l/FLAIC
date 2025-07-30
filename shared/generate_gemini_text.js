@@ -11,7 +11,7 @@ import { STORY_SCHEMA } from '../shared/schema.js';
  */
 export async function generateGeminiText(apiKey, model, prompt) {
 
-    if (process && apiKey == process.env.TEST_PASSWORD)
+    if (typeof process !== 'undefined' && apiKey == process.env.TEST_PASSWORD)
         apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
         console.error('GEMINI_API_KEY is not set or provided by the client.');
