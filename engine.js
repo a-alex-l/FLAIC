@@ -9,9 +9,9 @@ const IMAGE_HORIZON = 3;
 const TEXT_HORIZON = 5;
 
 // --- APPLICATION STATE ---
-let storyData = null; // Will hold the entire story object { world_info, characters, events, ... }
 let isGenerating = false; // A lock to prevent simultaneous API calls
 let compressedEventIndex = 0; // Index of the event currently being displayed
+export let storyData = null; // Will hold the entire story object { world_info, characters, events, ... }
 export let base64Images = {}; // Array to store generated images, can have empty slots
 export let currentEventIndex = -1; // Index of the event currently being displayed
 
@@ -22,20 +22,25 @@ export let currentEventIndex = -1; // Index of the event currently being display
 export async function generateNextStep(textService, textModel, textApiKey,
             imageService, imageModel, imageApiKey, prompt, style) {
     if (currentEventIndex >= 0) {
-        if (finalCaption !== storyData.events[currentEventIndex].caption) {
+        if (prompt !== storyData.events[currentEventIndex].caption) {
             console.log(`Caption for event ${currentEventIndex} changed. Branching story from this point.`);
             storyData.events.splice(currentEventIndex + 1);
         }
-        storyData.events[currentEventIndex].caption = finalCaption;
+        storyData.events[currentEventIndex].caption = prompt;
     }
     currentEventIndex++;
     if (!storyData || !storyData.events[currentEventIndex]) {
         console.log("No event found at index, attempting to fetch more story...");
+        try {
         await checkAndFetchStoryContinuation(textService, textModel, textApiKey,
                 imageService, imageModel, imageApiKey, prompt, style);
-        if (!storyData.events[currentEventIndex]) {
-            console.error("Failed to display panel: No event available even after fetch attempt.");
-            throw new Error("Sorry, AI did not generate any events for the story.");
+        } finally {
+            if (!storyData || !storyData.events[currentEventIndex]) {
+                currentEventIndex = -1;
+                storyData = null;
+                console.error("Failed to display panel: No event available even after fetch attempt.");
+                throw new Error("Sorry, AI did not generate any events for the story.");
+            }
         }
     }
     checkAndFetchStoryContinuation(textService, textModel, textApiKey,
@@ -90,7 +95,6 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
                 console.error('Somehow got unexisting Provider.');
                 throw new Error('Somehow got unexisting Provider.');
             }
-            newStoryPart = await generateGeminiText(textApiKey, textModel, prompt);
         } catch {
             const response = await fetch('/api/generate_story', {
                 method: 'POST',
@@ -101,7 +105,7 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
             if (!response.ok) {
                 console.error("Failed to fetch story update:", (await response.json()).error);
                 isGenerating = false;
-                return;
+                throw new Error('Failed to fetch story update.');
             }
             newStoryPart = await response.json();
         }
@@ -127,7 +131,7 @@ async function checkAndFetchImages(imageService, imageModel, imageApiKey, style)
     const imagePromises = [];
     const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
 
-    for (let i = currentEventIndex + 1; i < endIndex; i++) {
+    for (let i = currentEventIndex; i < endIndex; i++) {
         const depiction = storyData.events[i].depiction;
         if (!base64Images[depiction]) {
             base64Images[depiction] = "";

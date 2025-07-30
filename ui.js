@@ -1,4 +1,4 @@
-import { base64Images, currentEventIndex, generateNextStep } from './engine.js';
+import { base64Images, currentEventIndex, generateNextStep, storyData } from './engine.js';
 
 
 // --- DOM ELEMENT REFERENCES ---
