@@ -36,12 +36,14 @@ const IMAGE_PROVIDERS = {
 generateButton.addEventListener('click', handleGenerateClick);
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Correctly pass the provider dictionaries to the setup functions
     populateProviderSelect(TEXT_PROVIDERS, textProviderSelect);
     populateProviderSelect(IMAGE_PROVIDERS, imageProviderSelect);
 
     textProviderSelect.addEventListener('change', () => onProviderChange(TEXT_PROVIDERS, textProviderSelect, textModelSelect, textApiKeyInput));
     imageProviderSelect.addEventListener('change', () => onProviderChange(IMAGE_PROVIDERS, imageProviderSelect, imageModelSelect, imageApiKeyInput));
+
+    textProviderSelect.dispatchEvent(new Event('change'));
+    imageProviderSelect.dispatchEvent(new Event('change'));
 
     textApiKeyInput.addEventListener('input', syncApiKeys);
     generateButton.addEventListener('click', handleGenerateClick);
@@ -69,7 +71,7 @@ function populateProviderSelect(providers, selectElement) {
 function onProviderChange(providers, providerSelect, modelSelect, apiKeyInput) {
     const selectedProvider = providerSelect.value;
     apiKeyInput.value = '';
-    modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
+    modelSelect.innerHTML = '';
 
     if (selectedProvider && providers[selectedProvider]) {
         providers[selectedProvider].models.forEach(modelName => {
