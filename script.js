@@ -77,9 +77,8 @@ async function startNewStory(textApiKey, imageApiKey) {
                  "Setting: " + userPromptText;
 
     try {
-        let newStoryStart;
         try {
-            newStoryStart = await generateGeminiText(textApiKey, model, prompt);
+            storyData = await generateGeminiText(textApiKey, model, prompt);
         } catch {
             const response = await fetch('/api/generate_story', {
                 method: 'POST',
@@ -91,10 +90,10 @@ async function startNewStory(textApiKey, imageApiKey) {
                 console.error("Story generation failed:", (await response.json()).error);
                 throw new Error(`Story generation failed: ${ (await response.json()).error }`);
             }
-            newStoryStart = await response.json();
+            storyData = await response.json();
         }
-        console.log("Initial story data received:", newStoryStart);
-        if (!newStoryStart.events || newStoryStart.events.length === 0) {
+        console.log("Initial story data received:", storyData);
+        if (!storyData.events || storyData.events.length === 0) {
             throw new Error("Sorry, AI did not generate any events for the story.");
         }
         
