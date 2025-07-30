@@ -8,8 +8,35 @@ layout: base.html
     </header>
 
     <section class="top-controls">
-         <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API Key here to get better generations">
-         <input type="text" id="image-style-prompt" placeholder="Default Style: Epic, cinematic, hyper-realistic art style..." value="Epic, stunning, cinematic, hyper-realistic art style, sharp, detailed. ">
+        <!-- Text Generation Block -->
+        <div class="model-selector-block" id="text-generation-block">
+            <label class="block-label">Text Generation</label>
+            <div class="selector-row">
+                <select id="text-provider-select" class="provider-select">
+                    <option value="">-- Select Provider --</option>
+                </select>
+                <select id="text-model-select" class="model-select">
+                    <option value="">-- Select Model --</option>
+                </select>
+            </div>
+            <input type="password" id="text-api-key" class="api-key-input" placeholder="Enter API Key">
+        </div>
+
+        <!-- Image Generation Block -->
+        <div class="model-selector-block" id="image-generation-block">
+            <label class="block-label">Image Generation</label>
+            <div class="selector-row">
+                <select id="image-provider-select" class="provider-select">
+                    <option value="">-- Select Provider --</option>
+                </select>
+                <select id="image-model-select" class="model-select">
+                    <option value="">-- Select Model --</option>
+                </select>
+            </div>
+            <input type="password" id="image-api-key" class="api-key-input" placeholder="Enter API Key">
+        </div>
+        
+        <input type="text" id="image-style-prompt" placeholder="Image Style Prompt: Epic, cinematic, hyper-realistic..." value="Epic, stunning, cinematic, hyper-realistic art style, sharp, detailed. ">
     </section>
 
     <section id="comic-container" class="comic-container">

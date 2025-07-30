@@ -4,68 +4,23 @@ import { generateTensorOperaImage } from './shared/generate_tensoropera_image.js
 import { generateGeminiImage } from './shared/generate_gemini_image.js';
 
 
-// --- DOM ELEMENT REFERENCES ---
-const generateButton = document.getElementById('generate-btn');
-const comicContainer = document.getElementById('comic-container');
-const promptInput = document.getElementById('prompt-input');
-const controlsContainer = document.getElementById('controls-container');
-const geminiApiKeyInput = document.getElementById('gemini-api-key');
-const imageStyleInput = document.getElementById('image-style-prompt');
-
 // --- CONSTANTS ---
 const IMAGE_HORIZON = 3;
 const TEXT_HORIZON = 5;
 
 // --- APPLICATION STATE ---
 let storyData = null; // Will hold the entire story object { world_info, characters, events, ... }
-let base64Images = {}; // Array to store generated images, can have empty slots
-let currentEventIndex = -1; // Index of the event currently being displayed
 let isGenerating = false; // A lock to prevent simultaneous API calls
 let compressedEventIndex = 0; // Index of the event currently being displayed
+export let base64Images = {}; // Array to store generated images, can have empty slots
+export let currentEventIndex = -1; // Index of the event currently being displayed
 
-// --- EVENT LISTENERS ---
-generateButton.addEventListener('click', handleGenerateClick);
-
-/**
- * Main handler for the generate button.
- * It decides whether to start a new story or generate the next event.
- */
-async function handleGenerateClick() {
-    if (generateButton.disabled)
-        return;
-    const geminiApiKey = geminiApiKeyInput.value.trim();
-    /*if (!geminiApiKey) {
-        alert('Please enter your Gemini API Key.');
-        return;
-    }*/
-    const textApiKey = geminiApiKey || "4";
-    const imageApiKey = geminiApiKey || "4";
-
-    generateButton.disabled = true;
-
-    try {
-        if (!storyData) {
-            await startNewStory(textApiKey, imageApiKey);
-        } else {
-            await generateNextStep(textApiKey, imageApiKey);
-        }
-    } catch (error) {
-        console.error('An error occurred in the main generation flow:', error);
-    } finally {
-        generateButton.disabled = false;
-    }
-}
 
 /**
  * STEP 1: Starts a brand new story.
  * Called only on the very first "Start Story" click.
  */
-async function startNewStory(textApiKey, imageApiKey) {
-    const userPromptText = promptInput.value.trim();
-    if (!userPromptText) {
-        alert('Please enter a story prompt.');
-        throw new Error("Empty prompt.");
-    }
+async function startNewStory(textService, textModel, textApiKey, imageService, imageModel, imageApiKey, prompt) {
     
     const service = "gemini";
     const model = "gemini-2.5-flash";
@@ -113,40 +68,19 @@ async function startNewStory(textApiKey, imageApiKey) {
 /**
  * Generates and displays the next event in the story sequence.
  */
-async function generateNextStep(textApiKey, imageApiKey) {
+async function generateNextStep(textService, textModel, textApiKey, imageService, imageModel, imageApiKey, prompt) {
     if (currentEventIndex >= 0) {
-        const lastPanel = document.getElementById(`panel-${currentEventIndex}`);
-        const captionInput = lastPanel.querySelector('.caption-input');
-        const finalCaption = captionInput.value;
-
         if (finalCaption !== storyData.events[currentEventIndex].caption) {
             console.log(`Caption for event ${currentEventIndex} changed. Branching story from this point.`);
             storyData.events.splice(currentEventIndex + 1);
         }
-        
         storyData.events[currentEventIndex].caption = finalCaption;
-
-        const captionText = document.createElement('p');
-        captionText.className = 'caption-text';
-        captionText.textContent = finalCaption;
-        captionInput.replaceWith(captionText);
     }
     currentEventIndex++;
-
-    await displayCurrentPanel(textApiKey, imageApiKey);
-
-    checkAndFetchStoryContinuation(textApiKey, imageApiKey).catch(console.error);
-    checkAndFetchImages(imageApiKey).catch(console.error);
-}
-
-/**
- * Creates and displays the HTML for the current event panel.
- */
-async function displayCurrentPanel(textApiKey, imageApiKey) {
     let event = storyData.events[currentEventIndex];
     if (!event) {
         console.log("No event found at index, attempting to fetch more story...");
-        await checkAndFetchStoryContinuation(textApiKey, imageApiKey);
+        await checkAndFetchStoryContinuation(textService, textModel, textApiKey, imageService, imageModel, imageApiKey, prompt);
         event = storyData.events[currentEventIndex];
         
         if (!event) {
@@ -156,43 +90,15 @@ async function displayCurrentPanel(textApiKey, imageApiKey) {
             return;
         }
     }
-    
-    const panelElement = document.createElement('div');
-    panelElement.className = 'comic-panel';
-    panelElement.id = `panel-${currentEventIndex}`;
-
-    const imageElement = document.createElement('img');
-    imageElement.id = `image-${currentEventIndex}`;
-    imageElement.alt = event.depiction;
-
-    const imageData = base64Images[event.depiction];
-    if (imageData && imageData != "") {
-        imageElement.src = `data:image/webp;base64,${imageData}`;
-    } else {
-        imageElement.src = "";
-        await waitForImage(event.depiction, currentEventIndex);
-    }
-
-    const captionInput = document.createElement('textarea');
-    captionInput.className = 'caption-input';
-    captionInput.textContent = event.caption;
-    captionInput.addEventListener('input', () => autoResizeTextarea(captionInput));
-
-    panelElement.appendChild(imageElement);
-    panelElement.appendChild(captionInput);
-    comicContainer.appendChild(panelElement);
-    autoResizeTextarea(captionInput);
-
-    requestAnimationFrame(() => {
-        panelElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+    checkAndFetchStoryContinuation(textService, textModel, textApiKey, imageService, imageModel, imageApiKey, prompt).catch(console.error);
+    checkAndFetchImages(imageService, imageModel, imageApiKey).catch(console.error);
 }
 
 /**
  * Checks if more story events are needed and fetches them.
  * Triggered if fewer than TEXT_HORIZON events are left in the queue.
  */
-async function checkAndFetchStoryContinuation(textApiKey, imageApiKey) {
+async function checkAndFetchStoryContinuation(textService, textModel, textApiKey, imageService, imageModel, imageApiKey, prompt) {
     if (isGenerating)
         return;
     isGenerating = true;
@@ -247,9 +153,7 @@ async function checkAndFetchStoryContinuation(textApiKey, imageApiKey) {
  * Checks if more images are needed and fetches them ONE BY ONE.
  * Triggered if the image for an upcoming panel (IMAGE_HORIZON steps ahead) is missing.
  */
-async function checkAndFetchImages(apiKey) {
-    const service = "tensorOpera";
-    const model = "gemini-2.0-flash-preview-image-generation";
+async function checkAndFetchImages(imageService, imageModel, imageApiKey) {
     const imagePromises = [];
     const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
 
@@ -264,8 +168,8 @@ async function checkAndFetchImages(apiKey) {
             const promise = fetch('/api/generate_image', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ service: service, apiKey: apiKey,
-                                       model: model, prompt: prompt })
+                body: JSON.stringify({ service: imageService, apiKey: imageApiKey,
+                                       model: imageModel, prompt: prompt })
             })
             .then(res => {
                 if (!res.ok) {
@@ -299,38 +203,4 @@ async function checkAndFetchImages(apiKey) {
             base64Images[result.depiction] = result.image;
         }
     });
-}
-
-
-// --- HELPER FUNCTIONS ---
-
-/**
- * A helper to wait for a specific image to become available in the `base64Images` array.
- */
-function waitForImage(depiction, eventIndex) {
-    return new Promise(resolve => {
-        let watingCount = 100;
-        const intervalId = setInterval(() => {
-            if (base64Images[depiction] && base64Images[depiction] != "") {
-                const imgElement = document.getElementById(`image-${eventIndex}`);
-                if (imgElement && base64Images[depiction] != "Failed") {
-                    imgElement.src = `data:image/webp;base64,${base64Images[depiction]}`;
-                }
-                clearInterval(intervalId);
-                resolve();
-                return;
-            }
-            if (--watingCount == 0) {
-                console.log(`Timed out waiting for image for event ${eventIndex}. Displaying alt text.`);
-                clearInterval(intervalId);
-                resolve();
-                return;
-            }
-        }, 150);
-    });
-}
-
-function autoResizeTextarea(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
 }
