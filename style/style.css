@@ -163,7 +163,7 @@ h1 {
     object-fit: contain;
     display: block;
     border-radius: 6px;
-    background-color: #3a3a3a;
+    background-color: #232323;
 }
 
 /* Style for the editable caption input */
@@ -175,7 +175,7 @@ h1 {
     font-size: 1rem;
     color: #e0e0e0;
     background-color: #1e1e1e;
-    border: 1px dashed #087b00;
+    border: 1px #0068d7;
     border-radius: 6px;
     box-sizing: border-box;
     resize: vertical;
