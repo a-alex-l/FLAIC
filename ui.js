@@ -1,3 +1,5 @@
+import { base64Images, currentEventIndex, generateNextStep } from './engine.js';
+
 
 // --- DOM ELEMENT REFERENCES ---
 const generateButton = document.getElementById('generate-btn');
@@ -36,14 +38,14 @@ const IMAGE_PROVIDERS = {
 generateButton.addEventListener('click', handleGenerateClick);
 
 document.addEventListener('DOMContentLoaded', () => {
-    populateProviderSelect(textProviderSelect);
-    populateProviderSelect(imageProviderSelect);
+    // Correctly pass the provider dictionaries to the setup functions
+    populateProviderSelect(TEXT_PROVIDERS, textProviderSelect);
+    populateProviderSelect(IMAGE_PROVIDERS, imageProviderSelect);
 
-    textProviderSelect.addEventListener('change', () => onProviderChange(textProviderSelect, textModelSelect, textApiKeyInput));
-    imageProviderSelect.addEventListener('change', () => onProviderChange(imageProviderSelect, imageModelSelect, imageApiKeyInput));
+    textProviderSelect.addEventListener('change', () => onProviderChange(TEXT_PROVIDERS, textProviderSelect, textModelSelect, textApiKeyInput));
+    imageProviderSelect.addEventListener('change', () => onProviderChange(IMAGE_PROVIDERS, imageProviderSelect, imageModelSelect, imageApiKeyInput));
 
     textApiKeyInput.addEventListener('input', syncApiKeys);
-
     generateButton.addEventListener('click', handleGenerateClick);
 });
 
@@ -53,8 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
  * Populates a provider dropdown with options from the PROVIDERS constant.
  * @param {HTMLSelectElement} selectElement The dropdown to populate.
  */
-function populateProviderSelect(selectElement) {
-    Object.keys(PROVIDERS).forEach(providerName => {
+function populateProviderSelect(providers, selectElement) {
+    Object.keys(providers).forEach(providerName => {
         const option = document.createElement('option');
         option.value = providerName;
         option.textContent = providerName;
@@ -63,29 +65,22 @@ function populateProviderSelect(selectElement) {
 }
 
 /**
- * Handles the change event for a provider dropdown.
- * @param {HTMLSelectElement} providerSelect The provider dropdown that changed.
- * @param {HTMLSelectElement} modelSelect The corresponding model dropdown to update.
- * @param {HTMLInputElement} apiKeyInput The corresponding API key input to clear.
+ * Correctly populates the model dropdown based on the selected provider.
+ * @param {object} providers The dictionary of providers (TEXT_PROVIDERS or IMAGE_PROVIDERS).
  */
-function onProviderChange(providerSelect, modelSelect, apiKeyInput) {
+function onProviderChange(providers, providerSelect, modelSelect, apiKeyInput) {
     const selectedProvider = providerSelect.value;
-    
-    // 1. Clear the API key field
     apiKeyInput.value = '';
-
-    // 2. Clear and update the model dropdown
     modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
-    if (selectedProvider && PROVIDERS[selectedProvider]) {
-        PROVIDERS[selectedProvider].models.forEach(modelName => {
+
+    if (selectedProvider && providers[selectedProvider]) {
+        providers[selectedProvider].models.forEach(modelName => {
             const option = document.createElement('option');
             option.value = modelName;
             option.textContent = modelName;
             modelSelect.appendChild(option);
         });
     }
-
-    // 3. Sync API keys if providers match
     syncApiKeys();
 }
 
@@ -156,14 +151,15 @@ async function handleGenerateClick() {
         alert('Please enter a story prompt.');
         throw new Error("Empty prompt.");
     }
-
+    const style = imageStyleInput.value.trim();
     try {
-        await generateNextStep(textService, textModel, textApiKey, imageService, imageModel, imageApiKey, prompt);
+        await generateNextStep(textService, textModel, textApiKey, imageService, imageModel, imageApiKey, prompt, style);
+        promptInput.style.display = 'none';
+        await displayCurrentPanel();
     } catch (error) {
         alert('Sorry, something broke on owr end, please try reloading and come back later.');
         console.error('An error occurred in the main generation flow:', error);
     } finally {
-        await displayCurrentPanel();
         generateButton.disabled = false;
     }
 }
@@ -178,6 +174,7 @@ async function displayCurrentPanel() {
     panelElement.className = 'comic-panel';
     panelElement.id = `panel-${currentEventIndex}`;
 
+    const event = storyData.events[currentEventIndex];
     const imageElement = document.createElement('img');
     imageElement.id = `image-${currentEventIndex}`;
     imageElement.alt = event.depiction;

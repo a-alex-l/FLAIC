@@ -2,7 +2,8 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("assets");
   eleventyConfig.addPassthroughCopy("style");
   eleventyConfig.addPassthroughCopy("shared");
-  eleventyConfig.addPassthroughCopy("script.js");
+  eleventyConfig.addPassthroughCopy("ui.js");
+  eleventyConfig.addPassthroughCopy("engine.js");
 
   eleventyConfig.addExtension("html", {
     key: "njk", 

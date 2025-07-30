@@ -24,12 +24,12 @@ export default async function handler(request, response) {
         }
 
         let pngBase64;
-        if (service === "tensorOpera") {
+        if (service === "TensorOpera AI") {
             pngBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 10, 2);
-        } else if (service === "gemini") {
+        } else if (service === "Google AI Studio") {
             pngBase64 = await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 256, 256, 10, 2);
         } else {
-            return response.status(400).json({ error: `Unknown service: "${service}". Supported services are "tensorOpera" and "gemini".` });
+            return response.status(400).json({ error: `Unknown service: "${service}".` });
         }
 
         const imageBuffer = Buffer.from(pngBase64, 'base64');

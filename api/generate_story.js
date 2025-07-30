@@ -21,7 +21,7 @@ export default async function handler(request, response) {
             return response.status(400).json({ error: 'Request body must include "service", "apiKey" and "prompt".' });
         }
 
-        if (service === "gemini") {
+        if (service === "Google AI Studio") {
             response.status(200).json(await generateGeminiText(apiKey, model, prompt));
         } else {
             return response.status(400).json({ error: `Unknown service: "${service}". Supported services are "tensorOpera" and "gemini".` });
