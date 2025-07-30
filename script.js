@@ -93,12 +93,6 @@ async function startNewStory(textApiKey, imageApiKey) {
             }
             newStoryStart = await response.json();
         }
-        const response = await fetch('/api/generate_story', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ service: service, apiKey: textApiKey, model: model, prompt: initialPrompt, apiKey: textApiKey })
-        });
-        if (!response.ok) throw new Error(`Story generation failed: ${ (await response.json()).error }`);
         
         newStoryStart = await response.json();
         console.log("Initial story data received:", newStoryStart);
