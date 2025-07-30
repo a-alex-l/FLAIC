@@ -6,7 +6,7 @@ import { STORY_SCHEMA } from '../shared/schema.js';
  * @param {string} apiKey
  * @param {string} model - The specific model to use (e.g., "Flux/Dev").
  * @param {string} prompt - The text prompt for the image.
- * @returns {Promise<string>} A promise that resolves to the raw base64 encoded image string.
+ * @returns {json} A json answer.
  * @throws {Error} If the API call fails or the API key is missing.
  */
 export async function generateGeminiText(apiKey, model, prompt) {

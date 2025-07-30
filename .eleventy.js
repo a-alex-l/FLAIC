@@ -1,7 +1,7 @@
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("assets");
   eleventyConfig.addPassthroughCopy("style");
-  eleventyConfig.addPassthroughCopy("api");
+  eleventyConfig.addPassthroughCopy("shared");
   eleventyConfig.addPassthroughCopy("script.js");
 
   eleventyConfig.addExtension("html", {

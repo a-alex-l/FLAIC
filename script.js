@@ -1,3 +1,9 @@
+import { generateGeminiText } from 'shared/generate_gemini_text.js';
+
+import { generateTensorOperaImage } from 'shared/generate_tensoropera_image.js';
+import { generateGeminiImage } from 'shared/generate_gemini_image.js';
+
+
 // --- DOM ELEMENT REFERENCES ---
 const generateButton = document.getElementById('generate-btn');
 const comicContainer = document.getElementById('comic-container');
@@ -64,13 +70,29 @@ async function startNewStory(textApiKey, imageApiKey) {
     const service = "gemini";
     const model = "gemini-2.5-flash";
     comicContainer.innerHTML = '';
-    const initialPrompt = "Generate a story world and character descriptions based on the following setting. " +
+    const prompt = "Generate a story world and character descriptions based on the following setting. " +
                  "The world should include key locations, history, and culture. " +
                  "Generate 3 distinct characters with physical descriptions. " +
                  "There is no past yet so keep it empty. " +
                  "Setting: " + userPromptText;
 
     try {
+        let newStoryStart;
+        try {
+            newStoryStart = await generateGeminiText(textApiKey, model, prompt);
+        } catch {
+            const response = await fetch('/api/generate_story', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ service: service, apiKey: textApiKey, model: model, prompt: prompt })
+            });
+            
+            if (!response.ok) {
+                console.error("Story generation failed:", (await response.json()).error);
+                throw new Error(`Story generation failed: ${ (await response.json()).error }`);
+            }
+            newStoryStart = await response.json();
+        }
         const response = await fetch('/api/generate_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -78,10 +100,10 @@ async function startNewStory(textApiKey, imageApiKey) {
         });
         if (!response.ok) throw new Error(`Story generation failed: ${ (await response.json()).error }`);
         
-        storyData = await response.json();
-        console.log("Initial story data received:", storyData);
+        newStoryStart = await response.json();
+        console.log("Initial story data received:", newStoryStart);
 
-        if (!storyData.events || storyData.events.length === 0) {
+        if (!newStoryStart.events || newStoryStart.events.length === 0) {
             throw new Error("Sorry, AI did not generate any events for the story.");
         }
         
@@ -195,7 +217,7 @@ async function checkAndFetchStoryContinuation(textApiKey, imageApiKey) {
         compressedEventIndex = storyData.events.length;
         const eventData = recentEvents.map(e => e.caption).join('\n');
 
-        const continuationPrompt = "As a creative writer, your task is to write the next part of the story" +
+        const prompt = "As a creative writer, your task is to write the next part of the story" +
                 " in a series of small, sequential, and highly detailed steps." +
                 " Imagine you are writing a screenplay or a comic book script" +
                 " where every single action, reaction, and line of dialogue needs to be captured." +
@@ -204,24 +226,29 @@ async function checkAndFetchStoryContinuation(textApiKey, imageApiKey) {
                 " Events that just happened (aka RECENT_PAST):\n" + eventData + "\n\n" +
                 " Now, write a detailed description of the immediate aftermath or the very next event that occurs.";
         
-        const response = await fetch('/api/generate_story', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ service: service, apiKey: textApiKey, model: model, prompt: continuationPrompt })
-        });
-        
-        if (!response.ok) {
-            console.error("Failed to fetch story update:", (await response.json()).error);
-            isGenerating = false;
-        } else {
-            const newStoryPart = await response.json();
-            storyData.events.push(...newStoryPart.events);
-            storyData.past = newStoryPart.past;
-            storyData.characters = newStoryPart.characters;
-            storyData.world_info = newStoryPart.world_info;
-            console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
-            await checkAndFetchImages(imageApiKey).catch(console.error);
+        let newStoryPart;
+        try {
+            newStoryPart = await generateGeminiText(textApiKey, model, prompt);
+        } catch {
+            const response = await fetch('/api/generate_story', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ service: service, apiKey: textApiKey, model: model, prompt: prompt })
+            });
+            
+            if (!response.ok) {
+                console.error("Failed to fetch story update:", (await response.json()).error);
+                isGenerating = false;
+                return;
+            }
+            newStoryPart = await response.json();
         }
+        storyData.events.push(...newStoryPart.events);
+        storyData.past = newStoryPart.past;
+        storyData.characters = newStoryPart.characters;
+        storyData.world_info = newStoryPart.world_info;
+        console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
+        await checkAndFetchImages(imageApiKey).catch(console.error);
     }
     isGenerating = false;
 }
