@@ -128,9 +128,9 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
     
     try {
         if (imageService === "TensorOpera AI") {
-            base64Images[depiction] = "data:image/png;base64," + await generateTensorOperaImage(imageApiKey, imageModel, prompt, 1024, 1024, 20, 2);
+            base64Images[depiction] = "data:image/png;base64," + await generateTensorOperaImage(imageApiKey, imageModel, prompt, 512, 512, 15, 2);
         } else if (imageService === "Google AI Studio") {
-            base64Images[depiction] = "data:image/png;base64," + await generateGeminiImage(imageApiKey, imageModel, prompt, 1024, 1024, 20, 2);
+            base64Images[depiction] = "data:image/png;base64," + await generateGeminiImage(imageApiKey, imageModel, prompt, 512, 512, 15, 2);
         } else {
             console.error('Somehow got unexisting Image Provider.');
             throw new Error('Somehow got unexisting Image Provider.');

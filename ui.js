@@ -181,7 +181,7 @@ async function displayCurrentPanel() {
 
     const imageData = base64Images[event.depiction];
     if (imageData && imageData != "") {
-        imageElement.src = `data:image/webp;base64,${imageData}`;
+        imageElement.src = imageData;
     } else {
         imageElement.src = "";
         await waitForImage(event.depiction, currentEventIndex);
