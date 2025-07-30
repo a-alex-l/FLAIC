@@ -92,8 +92,8 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
             if (textService === "Google AI Studio") {
                 newStoryPart = await generateGeminiText(textApiKey, textModel, prompt);
             } else {
-                console.error('Somehow got unexisting Provider.');
-                throw new Error('Somehow got unexisting Provider.');
+                console.error('Somehow got unexisting Text Provider.');
+                throw new Error('Somehow got unexisting Text Provider.');
             }
         } catch {
             const response = await fetch('/api/generate_story', {
@@ -123,6 +123,29 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
     isGenerating = false;
 }
 
+async function checkAndFetchImage(depiction, imageService, imageModel, imageApiKey, style) {
+    console.log("Requesting image.");
+    const prompt = style + depiction;
+    
+    try {
+        if (service === "TensorOpera AI") {
+            base64Images[depiction] = "data:image/png;base64," + await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 1024, 1024, 20, 2);
+        } else if (service === "Google AI Studio") {
+            base64Images[depiction] = "data:image/png;base64," + await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 1024, 1024, 20, 2);
+        } else {
+            console.error('Somehow got unexisting Image Provider.');
+            throw new Error('Somehow got unexisting Image Provider.');
+        }
+    } catch {
+        base64Images[depiction] = "data:image/webp;base64," + await fetch('/api/generate_image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ service: imageService, apiKey: imageApiKey,
+                                   model: imageModel, prompt: prompt })
+        });
+    }
+}
+
 /**
  * Checks if more images are needed and fetches them ONE BY ONE.
  * Triggered if the image for an upcoming panel (IMAGE_HORIZON steps ahead) is missing.
@@ -135,45 +158,16 @@ async function checkAndFetchImages(imageService, imageModel, imageApiKey, style)
         const depiction = storyData.events[i].depiction;
         if (!base64Images[depiction]) {
             base64Images[depiction] = "";
-            console.log("Requesting image.");
-            const prompt = style + depiction;
-
-            const promise = fetch('/api/generate_image', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ service: imageService, apiKey: imageApiKey,
-                                       model: imageModel, prompt: prompt })
-            })
-            .then(res => {
-                if (!res.ok) {
-                    console.error(`Failed to generate image`);
-                    base64Images[depiction] != "Failed";
-                    return null;
-                }
-                return res.json();
-            })
-            .then(data => {
-                if (data) {
-                    console.log("Recieved image.");
-                    return { image: data.image, depiction: depiction };
-                }
-                return null;
-            })
-            .catch(err => {
-                console.error(`Error fetching image:`, err);
-                base64Images[depiction] != "Failed";
-                return null;
-            });
+            const promise = checkAndFetchImage(depiction, imageService, imageModel, imageApiKey, style);
             imagePromises.push(promise);
         }
     }
-        
-    if (imagePromises.length === 0) return;
-
-    const settledImages = await Promise.all(imagePromises);
-    settledImages.forEach(result => {
-        if (result) {
-            base64Images[result.depiction] = result.image;
+    if (imagePromises.length > 0) {
+        try {
+            await Promise.all(imagePromises);
+            console.log("All requested images have been fetched successfully.");
+        } catch (error) {
+            console.error("An error occurred while fetching one of the images:", error);
         }
-    });
+    }
 }

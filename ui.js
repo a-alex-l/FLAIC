@@ -214,7 +214,7 @@ function waitForImage(depiction, eventIndex) {
             if (base64Images[depiction] && base64Images[depiction] != "") {
                 const imgElement = document.getElementById(`image-${eventIndex}`);
                 if (imgElement && base64Images[depiction] != "Failed") {
-                    imgElement.src = `data:image/webp;base64,${base64Images[depiction]}`;
+                    imgElement.src = base64Images[depiction];
                 }
                 clearInterval(intervalId);
                 resolve();
