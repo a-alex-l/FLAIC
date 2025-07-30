@@ -1,0 +1,20 @@
+.back-link {
+  color: #005fc4;
+  text-decoration: none;
+}
+
+.back-link:visited {
+  color: #b392f0;
+}
+
+.plane-content {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
