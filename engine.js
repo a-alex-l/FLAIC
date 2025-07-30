@@ -101,7 +101,6 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ service: textService, apiKey: textApiKey, model: textModel, prompt: prompt })
             });
-            
             if (!response.ok) {
                 console.error("Failed to fetch story update:", (await response.json()).error);
                 isGenerating = false;
@@ -137,12 +136,17 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
             throw new Error('Somehow got unexisting Image Provider.');
         }
     } catch {
-        base64Images[depiction] = "data:image/webp;base64," + await fetch('/api/generate_image', {
+        const response = await fetch('/api/generate_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ service: imageService, apiKey: imageApiKey,
-                                   model: imageModel, prompt: prompt })
+            body: JSON.stringify({ service: textService, apiKey: textApiKey, model: textModel, prompt: prompt })
         });
+        if (!response.ok) {
+            console.error("Failed to fetch story update:", (await response.json()).error);
+            isGenerating = false;
+            throw new Error('Failed to fetch story update.');
+        }
+        base64Images[depiction] = "data:image/webp;base64," + await response.json().image;
     }
 }
 
