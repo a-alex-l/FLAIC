@@ -149,7 +149,7 @@ async function handleGenerateClick() {
     const prompt = GetPrompt();
     if (!prompt) {
         alert('Please enter a story prompt.');
-        throw new Error("Empty prompt.");
+        return;
     }
     const style = imageStyleInput.value.trim();
     try {
