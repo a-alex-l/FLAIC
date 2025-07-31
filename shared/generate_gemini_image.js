@@ -24,7 +24,7 @@ export async function generateGeminiImage(apiKey,
     const requestBody = {
         "contents": [{ "parts": [{ "text": `Generate an image with width = ${width} and hight = ${hight}:\n` + prompt }] }],
         "generationConfig": {
-            "responseModalities": ["TEXT", "IMAGE"]
+            "responseModalities": ["TEXT", "IMAGE"] // TODO: check payed tier this is for deleted "gemini-2.0-flash-preview-image-generation"
         }
     };
 

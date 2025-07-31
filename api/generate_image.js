@@ -27,7 +27,7 @@ export default async function handler(request, response) {
         if (service === "TensorOpera AI") {
             pngBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 10, 2);
         } else if (service === "Google AI Studio") {
-            pngBase64 = await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 256, 256, 10, 2);
+            // TODO: check payed tier pngBase64 = await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 256, 256, 10, 2);
         } else {
             return response.status(400).json({ error: `Unknown service: "${service}".` });
         }

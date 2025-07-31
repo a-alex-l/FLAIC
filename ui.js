@@ -24,9 +24,6 @@ const TEXT_PROVIDERS = {
     }
 };
 const IMAGE_PROVIDERS = {
-    "Google AI Studio": {
-        models: ["gemini-2.0-flash-preview-image-generation"],
-    },
     "TensorOpera AI": {
         models: ["Flux/Dev", "stabilityai/stable-diffusion-3-medium-diffusers", "flux_dev_meme"],
     }
