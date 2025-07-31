@@ -24,12 +24,15 @@ export default async function handler(request, response) {
         }
 
         let pngBase64;
-        if (service === "TensorOpera AI") {
-            pngBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 10, 2);
-        } else if (service === "Google AI Studio") {
-            // TODO: check payed tier pngBase64 = await generateGeminiImage(apiKey, "gemini-2.0-flash-preview-image-generation", prompt, 256, 256, 10, 2);
-        } else {
-            return response.status(400).json({ error: `Unknown service: "${service}".` });
+        try {
+            if (service === "TensorOpera AI") {
+                pngBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 10, 2);
+            } else {
+                return response.status(400).json({ error: `Unknown service: "${service}".` });
+            }
+        } catch {
+            console.log('User API didn`t fit. Using servers quota.');
+            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "Flux/Dev", prompt, 256, 256, 20, 2);
         }
 
         const imageBuffer = Buffer.from(pngBase64, 'base64');

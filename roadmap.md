@@ -7,7 +7,6 @@
 
 # Future Tasks
 * Add Cookie to save API and settings
-* Add Eden AI
 * Add DeepAI (thay are really expencive)
 * Add Leonardo.AI (thay are really expencive)
 * Add RunwayML (thay are really expencive)

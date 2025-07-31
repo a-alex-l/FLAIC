@@ -128,18 +128,18 @@ async function handleGenerateClick() {
     const textService = textProviderSelect.value;
     const textModel = textModelSelect.value;
     const textApiKey = textApiKeyInput.value.trim();
-    if (!textService || !textModel || !textApiKey) {
-        alert('Please select a provider, model, and enter an API key for text generation.');
+    /*if (!textApiKey) {
+        alert('Please enter an API key for text generation.');
         return;
-    }
+    }*/
 
     const imageService = imageProviderSelect.value;
     const imageModel = imageModelSelect.value;
     const imageApiKey = imageApiKeyInput.value.trim();
-    if (!imageService || !imageModel || !imageApiKey) {
-        alert('Please select a provider, model, and enter an API key for image generation.');
+    /*if (!imageApiKey) {
+        alert('Please enter an API key for image generation.');
         return;
-    }
+    }*/
 
     generateButton.disabled = true;
     
