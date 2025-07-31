@@ -136,10 +136,10 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
             throw new Error('Somehow got unexisting Image Provider.');
         }
     } catch {
-        const response = await fetch('/api/generate_story', {
+        const response = await fetch('/api/generate_image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ service: textService, apiKey: textApiKey, model: textModel, prompt: prompt })
+            body: JSON.stringify({ service: imageService, apiKey: imageApiKey, model: imageModel, prompt: prompt })
         });
         if (!response.ok) {
             console.error("Failed to fetch story update:", (await response.json()).error);
