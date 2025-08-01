@@ -17,7 +17,7 @@ export default async function handler(request, response) {
     }
 
     try {
-        const { service, apiKey, prompt } = request.body;
+        const { service, apiKey, model, prompt } = request.body;
         if (!service || typeof service !== 'string' || !prompt || typeof prompt !== 'string') {
             return response.status(400).json({ error: 'Request body must include "service", "apiKey" and "prompt".' });
         }
@@ -25,13 +25,13 @@ export default async function handler(request, response) {
         let pngBase64;
         try {
             if (service === "TensorOpera AI") {
-                pngBase64 = await generateTensorOperaImage(apiKey, "Flux/Dev", prompt, 256, 256, 10, 2);
+                pngBase64 = await generateTensorOperaImage(apiKey, model, prompt, 256, 256, 10, 2);
             } else {
                 return response.status(400).json({ error: `Unknown service: "${service}".` });
             }
         } catch {
             console.log('User API didn`t fit. Using servers quota.');
-            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "Flux/Dev", prompt, 256, 256, 20, 2);
+            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "stabilityai/sdxl_emoji", prompt, 256, 256, 20, 2);
         }
 
         const imageBuffer = Buffer.from(pngBase64, 'base64');
