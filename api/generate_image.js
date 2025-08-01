@@ -25,13 +25,13 @@ export default async function handler(request, response) {
         let pngBase64;
         try {
             if (service === "TensorOpera AI") {
-                pngBase64 = await generateTensorOperaImage(apiKey, model, prompt, 256, 256, 4, 0);
+                pngBase64 = await generateTensorOperaImage(apiKey, model, prompt, 512, 512, 15, 2);
             } else {
                 return response.status(400).json({ error: `Unknown service: "${service}".` });
             }
         } catch {
             console.log('User API didn`t fit. Using servers quota.');
-            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "stabilityai/sdxl_emoji", prompt, 256, 256, 4, 0);
+            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "stabilityai/sdxl_emoji", prompt, 512, 512, 15, 2);
         }
 
         const imageBuffer = Buffer.from(pngBase64, 'base64');
