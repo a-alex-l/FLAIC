@@ -16,8 +16,7 @@ export default async function handler(request, response) {
     try {
         const { service, apiKey, prompt } = request.body;
         const model = "gemini-2.0-flash-lite";
-        if (!service || typeof service !== 'string' || !apiKey || typeof apiKey !== 'string' ||
-                    !prompt || typeof prompt !== 'string') {
+        if (!service || typeof service !== 'string' || !prompt || typeof prompt !== 'string') {
             return response.status(400).json({ error: 'Request body must include "service", "apiKey" and "prompt".' });
         }
 

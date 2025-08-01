@@ -18,8 +18,7 @@ export default async function handler(request, response) {
 
     try {
         const { service, apiKey, prompt } = request.body;
-        if (!service || typeof service !== 'string' || !apiKey || typeof apiKey !== 'string' ||
-                    !prompt || typeof prompt !== 'string') {
+        if (!service || typeof service !== 'string' || !prompt || typeof prompt !== 'string') {
             return response.status(400).json({ error: 'Request body must include "service", "apiKey" and "prompt".' });
         }
 
