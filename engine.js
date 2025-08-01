@@ -141,12 +141,12 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ service: imageService, apiKey: imageApiKey, model: imageModel, prompt: prompt })
         });
+        const json = await response.json();
         if (!response.ok) {
-            console.error("Failed to fetch story update:", (await response.json()).error);
-            isGenerating = false;
+            console.error("Failed to fetch story update:", json.error);
             throw new Error('Failed to fetch story update.');
         }
-        base64Images[depiction] = "data:image/webp;base64," + await response.json().image;
+        base64Images[depiction] = "data:image/webp;base64," + json.image;
     }
 }
 
