@@ -31,7 +31,7 @@ export default async function handler(request, response) {
             }
         } catch {
             console.log('User API didn`t fit. Using servers quota.');
-            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "stabilityai/sdxl_emoji", prompt, 512, 512, 15, 2);
+            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "flux_dev_meme", prompt, 512, 512, 15, 2);
         }
 
         const imageBuffer = Buffer.from(pngBase64, 'base64');
