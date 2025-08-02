@@ -25,7 +25,7 @@ const TEXT_PROVIDERS = {
 };
 const IMAGE_PROVIDERS = {
     "TensorOpera AI": {
-        models: ["flux_dev_meme", "stabilityai/sdxl_emoji", "stabilityai/stable-diffusion-3-medium-diffusers"],
+        models: ["stabilityai/flux_dev_meme", "stabilityai/sdxl_emoji", "stabilityai/stable-diffusion-3-medium-diffusers"],
     }
 };
 
