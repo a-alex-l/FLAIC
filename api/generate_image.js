@@ -1,5 +1,6 @@
 import { generateTensorOperaImage } from '../shared/generate_tensoropera_image.js';
 import { generateGeminiImage } from '../shared/generate_gemini_image.js';
+import { generateTogetherAIImageUrl } from './shared/generate_together_ai_image.js';
 
 
 /*
@@ -25,13 +26,15 @@ export default async function handler(request, response) {
         let pngBase64;
         try {
             if (service === "TensorOpera AI") {
-                pngBase64 = await generateTensorOperaImage(apiKey, model, prompt, 512, 512, 15, 2);
+                pngBase64 = await generateTensorOperaImage(apiKey, model, prompt, 1024, 1024, 15, 2);
+            } else if (service === "together.ai") {
+                return response.status(200).json({ url: await generateTogetherAIImageUrl(apiKey, model, prompt, 1024, 1024, 4, 2)});
             } else {
                 return response.status(400).json({ error: `Unknown service: "${service}".` });
             }
         } catch {
             console.warn('User API didn`t fit. Using servers quota.');
-            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "stabilityai/flux_dev_meme", prompt, 1024, 1024, 40, 2);
+            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "stabilityai/flux_dev_meme", prompt, 512, 512, 15, 2);
         }
 
         const imageBuffer = Buffer.from(pngBase64, 'base64');
@@ -39,9 +42,9 @@ export default async function handler(request, response) {
         const compressedBase64 = compressedImageBuffer.toString('base64');
 
         console.log(`Compressed ${pngBase64.length}->${compressedBase64.length}`);
-        response.status(200).json({ image: compressedBase64 });
+        return response.status(200).json({ image: compressedBase64 });
     } catch (error) {
         console.error('Error in generate_image handler:', error.message);
-        response.status(500).json({ error: error.message || 'An internal server error occurred.' });
+        return response.status(500).json({ error: error.message || 'An internal server error occurred.' });
     }
 }

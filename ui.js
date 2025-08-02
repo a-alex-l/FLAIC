@@ -1,5 +1,6 @@
 import { base64Images, currentEventIndex, generateNextStep, storyData } from './engine.js';
 
+import { generateTogetherAIImage } from './shared/generate_together_ai_image.js';
 
 // --- DOM ELEMENT REFERENCES ---
 const generateButton = document.getElementById('generate-btn');
@@ -20,12 +21,15 @@ const imageApiKeyInput = document.getElementById('image-api-key');
 // --- CONSTANTS ---
 const TEXT_PROVIDERS = {
     "Google AI Studio": {
-        models: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"],
+        models: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
     }
 };
 const IMAGE_PROVIDERS = {
     "TensorOpera AI": {
-        models: ["stabilityai/flux_dev_meme", "stabilityai/sdxl_emoji", "stabilityai/stable-diffusion-3-medium-diffusers"],
+        models: ["stabilityai/flux_dev_meme", "stabilityai/sdxl_emoji", "stabilityai/stable-diffusion-3-medium-diffusers"]
+    },
+    "together.ai": {
+         models: ["black-forest-labs/FLUX.1-schnell-Free"]
     }
 };
 
@@ -122,6 +126,9 @@ function GetPrompt() {
  * It decides whether to start a new story or generate the next event.
  */
 async function handleGenerateClick() {
+    
+    generateTogetherAIImage("b4b720be5d78a9737e3276fd8a13bd40b19af613959b966ad1c39514219a4d9d", 
+        "black-forest-labs/FLUX.1-schnell-Free", "A cat with horns", 512, 512, 4, 2);
     if (generateButton.disabled)
         return;
 
@@ -178,7 +185,7 @@ async function displayCurrentPanel() {
 
     const imageData = base64Images[event.depiction];
     if (imageData && imageData != "") {
-        imageElement.src = imageData;
+        imageElement.src = addType(imageData);
     } else {
         imageElement.src = "";
         await waitForImage(event.depiction, currentEventIndex);
@@ -211,7 +218,7 @@ function waitForImage(depiction, eventIndex) {
             if (base64Images[depiction] && base64Images[depiction] != "") {
                 const imgElement = document.getElementById(`image-${eventIndex}`);
                 if (imgElement && base64Images[depiction] != "Failed") {
-                    imgElement.src = base64Images[depiction];
+                    imgElement.src = addType(base64Images[depiction]);
                 }
                 clearInterval(intervalId);
                 resolve();
@@ -226,6 +233,38 @@ function waitForImage(depiction, eventIndex) {
         }, 150);
     });
 }
+
+/**
+ * Converts a raw base64 string into a full Data URI by automatically
+ * detecting the MIME type and prepending the necessary prefix.
+ * @param {string | null | undefined} base64String The raw base64 string (e.g., "iVBOR...").
+ * @returns {string} The full Data URI (e.g., "data:image/png;base64,iVBOR..."),
+ *                   or the original string if it already has a prefix,
+ *                   or an empty string if the input is empty/null.
+ */
+export function addType(base64String) {
+    if (!base64String || base64String.startsWith('data:')) {
+        return base64String || "";
+    }
+
+    switch (true) {
+        case base64String.startsWith('iVBOR'):
+            return `data:image/png;base64,${base64String}`;
+        case base64String.startsWith('/9j/'):
+            return `data:image/jpeg;base64,${base64String}`;
+        case base64String.startsWith('R0lGO'):
+            return `data:image/gif;base64,${base64String}`;
+        case base64String.startsWith('UklGR'):
+            return `data:image/webp;base64,${base64String}`;
+        case base64String.startsWith('PHN2Zy'): // Corresponds to "<svg"
+            return `data:image/svg+xml;base64,${base64String}`;
+        case base64String.startsWith('Qk0='):
+            return `data:image/bmp;base64,${base64String}`;
+        default:
+            return `data:application/octet-stream;base64,${base64String}`;
+    }
+}
+
 
 function autoResizeTextarea(textarea) {
     textarea.style.height = 'auto';

@@ -1,6 +1,7 @@
 import { generateGeminiText } from './shared/generate_gemini_text.js';
 
 import { generateTensorOperaImage } from './shared/generate_tensoropera_image.js';
+import { generateTogetherAIImage, downloadImageAsBase64 } from './shared/generate_together_ai_image.js';
 import { generateGeminiImage } from './shared/generate_gemini_image.js';
 
 
@@ -128,9 +129,11 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
     
     try {
         if (imageService === "TensorOpera AI") {
-            base64Images[depiction] = "data:image/png;base64," + await generateTensorOperaImage(imageApiKey, imageModel, prompt, 512, 512, 15, 2);
+            base64Images[depiction] = await generateTensorOperaImage(imageApiKey, imageModel, prompt, 1024, 1024, 15, 2);
         } else if (imageService === "Google AI Studio") {
-            base64Images[depiction] = "data:image/png;base64," + await generateGeminiImage(imageApiKey, imageModel, prompt, 512, 512, 15, 2);
+            base64Images[depiction] = await generateGeminiImage(imageApiKey, imageModel, prompt, 1024, 1024, 15, 2);
+        } else if (imageService === "together.ai") {
+            base64Images[depiction] = await generateTogetherAIImage(imageApiKey, imageModel, prompt, 1024, 1024, 4, 2);
         } else {
             console.error('Somehow got unexisting Image Provider.');
             throw new Error('Somehow got unexisting Image Provider.');
@@ -143,10 +146,17 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
         });
         const json = await response.json();
         if (!response.ok) {
-            console.error("Failed to fetch story update:", json.error);
-            throw new Error('Failed to fetch story update.');
+            console.error("Failed to fetch image", json.error);
+            throw new Error('Failed to fetch image');
         }
-        base64Images[depiction] = "data:image/webp;base64," + json.image;
+        if ('image' in json) {
+            base64Images[depiction] = json.image;
+        } else if ('url' in json) {
+            base64Images[depiction] = downloadImageAsBase64(json.url);
+        } else {
+            confirm.error(`Unexpected image json: ${json}`);
+            base64Images[depiction] = "Failed";
+        }
     }
 }
 
