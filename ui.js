@@ -126,9 +126,6 @@ function GetPrompt() {
  * It decides whether to start a new story or generate the next event.
  */
 async function handleGenerateClick() {
-    
-    generateTogetherAIImage("b4b720be5d78a9737e3276fd8a13bd40b19af613959b966ad1c39514219a4d9d", 
-        "black-forest-labs/FLUX.1-schnell-Free", "A cat with horns", 512, 512, 4, 2);
     if (generateButton.disabled)
         return;
 
