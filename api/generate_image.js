@@ -30,8 +30,8 @@ export default async function handler(request, response) {
                 return response.status(400).json({ error: `Unknown service: "${service}".` });
             }
         } catch {
-            console.log('User API didn`t fit. Using servers quota.');
-            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "stabilityai/flux_dev_meme", prompt, 512, 512, 15, 2);
+            console.warning('User API didn`t fit. Using servers quota.');
+            pngBase64 = await generateTensorOperaImage(process.env.TEST_PASSWORD, "stabilityai/flux_dev_meme", prompt, 1024, 1024, 40, 2);
         }
 
         const imageBuffer = Buffer.from(pngBase64, 'base64');

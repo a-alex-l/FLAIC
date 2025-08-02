@@ -27,7 +27,7 @@ export default async function handler(request, response) {
                 return response.status(400).json({ error: `Unknown service: "${service}". Supported services are "tensorOpera" and "gemini".` });
             }
         } catch {
-            console.log('User API didn`t fit. Using servers quota.');
+            console.warning('User API didn`t fit. Using servers quota.');
             return response.status(200).json(await generateGeminiText(process.env.TEST_PASSWORD, "gemini-2.5-flash", prompt));
         }
     } catch (error) {
