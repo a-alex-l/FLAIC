@@ -14,7 +14,7 @@ export async function generateGeminiText(apiKey, model, prompt) {
     if (typeof process !== 'undefined' && apiKey == process.env.TEST_PASSWORD)
         apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        console.warning('GEMINI_API_KEY is not set or provided by the client.');
+        console.warn('GEMINI_API_KEY is not set or provided by the client.');
         throw new Error('Server configuration error: Gemini API key is missing.');
     }
 

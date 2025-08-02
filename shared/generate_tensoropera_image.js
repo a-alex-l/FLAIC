@@ -16,7 +16,7 @@ export async function generateTensorOperaImage(apiKey,
     if (typeof process !== 'undefined' && apiKey == process.env.TEST_PASSWORD)
         apiKey = process.env.TENSOR_OPERA_API_KEY;
     if (!apiKey) {
-        console.warning('TENSOR_OPERA_API_KEY is not set in environment variables.');
+        console.warn('TENSOR_OPERA_API_KEY is not set in environment variables.');
         throw new Error('Server configuration error: TensorOpera API key is missing.');
     }
 
