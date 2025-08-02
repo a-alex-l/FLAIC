@@ -46,7 +46,6 @@ export async function generateTogetherAIImageUrl(apiKey,
         throw new Error(`Failed to generate image. Status: ${apiResponse.status}. Message: ${json.error?.message || 'Unknown error'}`);
     }
 
-    console.log(json);
     console.log(json.data[0].url);
     return json.data[0].url;
 }

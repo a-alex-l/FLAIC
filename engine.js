@@ -133,7 +133,8 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
         } else if (imageService === "Google AI Studio") {
             base64Images[depiction] = await generateGeminiImage(imageApiKey, imageModel, prompt, 1024, 1024, 15, 2);
         } else if (imageService === "together.ai") {
-            base64Images[depiction] = await generateTogetherAIImage(imageApiKey, imageModel, prompt, 1024, 1024, 4, 2);
+            throw new Error("Sadly due to CORS Policy needs to go through the server");
+            //base64Images[depiction] = await generateTogetherAIImage(imageApiKey, imageModel, prompt, 1024, 1024, 4, 2);
         } else {
             console.error('Somehow got unexisting Image Provider.');
             throw new Error('Somehow got unexisting Image Provider.');
