@@ -24,44 +24,46 @@
     {{ content | safe }}
 
     <main class="container">
-      <header>
-          <p class="subtitle">Create an interactive story. Start with an idea, and guide it one step by step!</p>
-          <p class="subtitle">FLAIC is a free interface over Your AI tools!</p>
-      </header>
+        <header>
+            <p class="subtitle">Create an interactive story. Start with an idea, and guide it one step by step!</p>
+            <p class="subtitle">FLAIC is a free interface over Your AI tools!</p>
+        </header>
 
-      <section class="top-controls">
-          <div class="model-selector-block" id="text-generation-block">
-              <label class="block-label">Text Generation API Key</label>
-              <div class="selector-row">
-                  <select id="text-provider-select" class="provider-select"></select>
-                  <select id="text-model-select" class="model-select"></select>
-              </div>
-              <input type="password" id="text-api-key" class="api-key-input" placeholder="Enter API Key">
-          </div>
+        <section class="top-controls">
+            <details>
+                <summary>Advanced</summary>
+                    <div class="model-selector-block" id="text-generation-block">
+                        <label class="block-label">Text Generation API Key</label>
+                        <div class="selector-row">
+                            <select id="text-provider-select" class="provider-select"></select>
+                            <select id="text-model-select" class="model-select"></select>
+                        </div>
+                        <input type="password" id="text-api-key" class="api-key-input" placeholder="Enter API Key">
+                    </div>
 
-          <div class="model-selector-block" id="image-generation-block">
-              <label class="block-label">Image Generation API Key</label>
-              <div class="selector-row">
-                  <select id="image-provider-select" class="provider-select"></select>
-                  <select id="image-model-select" class="model-select"></select>
-              </div>
-              <input type="password" id="image-api-key" class="api-key-input" placeholder="Enter API Key">
-          </div>
-          
-          <input type="text" id="image-style-prompt" placeholder="Image Style Prompt: Epic, cinematic, hyper-realistic..." value="Epic, stunning, cinematic, hyper-realistic art style, sharp, detailed. ">
-      </section>
+                    <div class="model-selector-block" id="image-generation-block">
+                        <label class="block-label">Image Generation API Key</label>
+                        <div class="selector-row">
+                            <select id="image-provider-select" class="provider-select"></select>
+                            <select id="image-model-select" class="model-select"></select>
+                        </div>
+                        <input type="password" id="image-api-key" class="api-key-input" placeholder="Enter API Key">
+                    </div>
+                <input type="text" id="image-style-prompt" placeholder="Image Style Prompt: Epic, cinematic, hyper-realistic..." value="Epic, stunning, cinematic, hyper-realistic art style, sharp, detailed. ">
+            </details>
+        </section>
 
-      <section id="comic-container" class="comic-container">
-          <!-- Comic panels will be dynamically inserted here -->
-      </section>
+        <section id="comic-container" class="comic-container">
+            <!-- Comic panels will be dynamically inserted here -->
+        </section>
 
-      <section id="controls-container" class="controls">
-          <textarea id="prompt-input" placeholder="Start your story here. For example: 'A cat who wants to become an astronaut builds a rocket out of cardboard boxes.'"></textarea>
-          <button id="generate-btn">Generate</button>
-      </section>
-      
-      <script type="module" src="/ui.js"></script>
-  </main>
+        <section id="controls-container" class="controls">
+            <textarea id="prompt-input" placeholder="Start your story here. For example: 'A cat who wants to become an astronaut builds a rocket out of cardboard boxes.'"></textarea>
+            <button id="generate-btn">Generate</button>
+        </section>
+        
+        <script type="module" src="/ui.js"></script>
+    </main>
 
     {% include "footer.html" %}
 
