@@ -1,6 +1,6 @@
 import { generateTensorOperaImage } from '../shared/generate_tensoropera_image.js';
 import { generateGeminiImage } from '../shared/generate_gemini_image.js';
-import { generateTogetherAIImageUrl } from './shared/generate_together_ai_image.js';
+import { generateTogetherAIImageUrl } from '../shared/generate_together_ai_image.js';
 
 
 /*
