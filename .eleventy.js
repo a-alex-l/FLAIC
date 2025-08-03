@@ -1,14 +1,15 @@
+const { DateTime } = require("luxon");
+
 module.exports = function(eleventyConfig) {
+  eleventyConfig.addFilter("sitemapDate", (dateObj) => {
+    return DateTime.fromJSDate(dateObj, { zone: 'utc' }).toFormat('yyyy-LL-dd');
+  });
+
   eleventyConfig.addPassthroughCopy("assets");
   eleventyConfig.addPassthroughCopy("style");
   eleventyConfig.addPassthroughCopy("shared");
   eleventyConfig.addPassthroughCopy("ui.js");
   eleventyConfig.addPassthroughCopy("engine.js");
-
-  eleventyConfig.addExtension("html", {
-    key: "njk", 
-    engine: "html",
-  });
 
   return {
     dir: {
@@ -16,7 +17,11 @@ module.exports = function(eleventyConfig) {
       includes: "_includes",
       output: "_site",
     },
-    htmlTemplateEngine: "njk", 
-    dataTemplateEngine: "njk" 
+    
+    metadata: {
+      url: "https://flaic.fun"
+    },
+    htmlTemplateEngine: "njk",
+    dataTemplateEngine: "njk"
   };
 };

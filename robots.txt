@@ -1,0 +1,7 @@
+User-agent: *
+
+Disallow: /api/
+
+Allow: /
+
+Sitemap: https://flaic.fun/sitemap.xml
