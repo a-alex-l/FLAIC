@@ -10,6 +10,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("shared");
   eleventyConfig.addPassthroughCopy("ui.js");
   eleventyConfig.addPassthroughCopy("engine.js");
+  eleventyConfig.addPassthroughCopy("robots.txt");
 
   return {
     dir: {
