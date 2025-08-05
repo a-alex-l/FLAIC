@@ -18,6 +18,66 @@
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
+
+    <!-- [Structured Data (JSON-LD)] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      {% if schemaType == 'SoftwareApplication' %}
+      "@type": "SoftwareApplication",
+      "name": "{{ title }}",
+      "url": "https://flaic.fun{{ permalink | url }}",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web-based",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "{{ description }}"
+
+      {% elif schemaType == 'BreadcrumbList' %}
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "FLAIC Home",
+          "item": "https://flaic.fun/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "{{ title }}",
+          "item": "https://flaic.fun{{ permalink | url }}"
+        }
+      ]
+
+      {% elif schemaType == 'AboutPage' %}
+      "@type": "AboutPage",
+      "name": "{{ title }}",
+      "url": "https://flaic.fun{{ permalink | url }}",
+      "description": "{{ description }}",
+      "mainEntity": {
+        "@type": "Organization",
+        "name": "FLAIC",
+        "url": "https://flaic.fun/",
+        "logo": "https://flaic.fun/assets/novel.png",
+        "sameAs": [
+          "https://github.com/a-alex-l/FLAIC",
+          "https://t.me/+ZJubebAnw0lmMDcy"
+        ]
+      }
+
+      {% else %}
+      "@type": "WebPage",
+      "name": "{{ title }}",
+      "url": "https://flaic.fun{{ permalink | url }}",
+      "description": "{{ description }}"
+      {% endif %}
+    }
+    </script>
+    <!-- End Structured Data -->
 </head>
 <body>
 
@@ -25,8 +85,7 @@
 
     <main class="container">
         <header>
-            <p class="subtitle">Create an interactive story. Start with an idea, and guide it one step by step!</p>
-            <p class="subtitle">FLAIC is a free interface over Your AI tools!</p>
+            <h1>{{ header | default(title) | safe }}</h1>
         </header>
 
         <section class="top-controls">

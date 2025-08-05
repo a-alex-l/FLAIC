@@ -4,7 +4,10 @@
 * Publish Play Store app
 
 
-# Future Tasks
+# Future Tasks:
+* Add bug button option
+
+# Far Future Tasks
 * Add Cookie to save API and settings
 * Add image size, steps cound and guidance settings
 * Add DeepAI (thay are really expencive)
