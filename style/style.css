@@ -26,6 +26,8 @@ header {
 }
 
 h1 {
+    margin: 1rem auto;
+    width: 70%;
     color: #f5f5f5;
     margin-bottom: 0.5rem;
 }
