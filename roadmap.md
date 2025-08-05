@@ -1,5 +1,6 @@
 # Current Tasks:
 * Add Reset Button
+* Make pages https canonical
 * Publish Play Store app
 
 
