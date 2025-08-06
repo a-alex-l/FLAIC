@@ -87,7 +87,6 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
     if (!storyData || storyData.story_beats.length - currentEventIndex <= TEXT_HORIZON) {
         console.log("Requesting story update.");
         const prompt = CollectPrompt(userPrompt);
-        
         let newStoryPart;
         try {
             if (textService === "Google AI Studio") {
