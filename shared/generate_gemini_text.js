@@ -58,6 +58,7 @@ export async function generateGeminiText(apiKey, model, prompt) {
     }
 
     console.log(responseData);
+    console.log(responseData.candidates[0].content.parts);
     const jsonText = responseData.candidates[0].content.parts[0].text;
     return JSON.parse(jsonText);
 }
