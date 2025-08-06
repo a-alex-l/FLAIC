@@ -28,7 +28,7 @@ export default async function handler(request, response) {
             }
         } catch {
             console.warn('User API didn`t fit. Using servers quota.');
-            return response.status(200).json(await generateGeminiText(process.env.TEST_PASSWORD, "gemini-2.5-flash", prompt));
+            return response.status(200).json(await generateGeminiText(process.env.TEST_PASSWORD, "gemini-2.5-pro", prompt));
         }
     } catch (error) {
         console.error('Error in generate_story handler:', error);
