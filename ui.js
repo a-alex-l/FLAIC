@@ -101,6 +101,11 @@ function syncApiKeys() {
 }
 
 
+function escapeQuotes(str) {
+  return str.replace(/['"]/g, '\\$&');
+}
+
+
 /*
  *
  */
@@ -114,9 +119,9 @@ function GetPrompt() {
         captionText.className = 'caption-text';
         captionText.textContent = finalCaption;
         captionInput.replaceWith(captionText);
-        return finalCaption;
+        return escapeQuotes(finalCaption);
     } else {
-        return promptInput.value;
+        return escapeQuotes(promptInput.value);
     }
 }
 
