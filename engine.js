@@ -51,7 +51,7 @@ export async function generateNextStep(textService, textModel, textApiKey,
 
 function CollectPrompt(prompt) {
     if (storyData) {
-        const storySoFar = { ...storyData, story_plan: "",
+        const storySoFar = { ...storyData,
             premise: "", current_chapter_synopsis: "",
             current_scene_idea: "", story_beats: [] };
         
@@ -113,7 +113,6 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
         if (storyData) {
             storyData.story_beats.push(...newStoryPart.story_beats);
             storyData.past = newStoryPart.past;
-            storyData.story_plan = newStoryPart.story_plan;
             storyData.premise = newStoryPart.premise;
             storyData.current_chapter_synopsis = newStoryPart.current_chapter_synopsis;
             storyData.current_scene_idea = newStoryPart.current_scene_idea;
