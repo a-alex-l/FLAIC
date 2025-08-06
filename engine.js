@@ -51,19 +51,21 @@ export async function generateNextStep(textService, textModel, textApiKey,
 
 function CollectPrompt(prompt) {
     if (storyData) {
-        const storySoFar = { ...storyData, premise: "", current_chapter_synopsis: "", current_scene_idea: "", story_beats: [] };
+        const storySoFar = { ...storyData, story_plan: "",
+            premise: "", current_chapter_synopsis: "",
+            current_scene_idea: "", story_beats: [] };
         
         const recentEvents = storyData.story_beats.slice(compressedEventIndex, storyData.story_beats.length);
         compressedEventIndex = storyData.story_beats.length;
         const eventData = recentEvents.map(e => e.caption).join('\n');
+        storySoFar.past += eventData;
 
         return "As a creative writer, your task is to write the next part of the story" +
                " in a series of small, sequential, and highly detailed steps." +
                " Imagine you are writing a screenplay or a comic book script" +
                " where every single action, reaction, and line of dialogue needs to be captured." +
-               " It is crucial that these new story_beats logically and immediately follow the 'RECENT_PAST'." +
+               " It is crucial that these new story_beats logically and immediately follow the 'past'." +
                " Full Story So Far:\n" + JSON.stringify(storySoFar) + "\n\n" +
-               " Events that just happened (aka RECENT_PAST):\n" + eventData + "\n\n" +
                " Now, write a detailed description of the immediate aftermath or the very next event that occurs.";
         
     } else {
@@ -111,6 +113,7 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
         if (storyData) {
             storyData.story_beats.push(...newStoryPart.story_beats);
             storyData.past = newStoryPart.past;
+            storyData.story_plan = newStoryPart.story_plan;
             storyData.premise = newStoryPart.premise;
             storyData.current_chapter_synopsis = newStoryPart.current_chapter_synopsis;
             storyData.current_scene_idea = newStoryPart.current_scene_idea;

@@ -7,19 +7,27 @@ export const STORY_SCHEMA = {
         },
         "past": {
             "type": "string",
-            "description": "Extract key information from old past and add RECENT_PAST. (Aim for around 500 words)"
+            "description": "Extract key information from old past. Aim for around 500 words"
         },
         "characters": {
             "type": "array",
-            "description": "For each character there should be info (at least 3 characters)",
+            "description": "For each character there should be info. Make at least 3 characters",
             "items": {
                 "type": "string",
                 "description": "A description of how a character looks, behaives. Mention colors, race, species, gender, apparent age, build/physique, shapes, positions, poses, clothes, hair style, hair color, skin color, eye color, footwear type, objects/weapons, accessories, distinguishing marks/features, expressions, lighting, texture, condition of cloth, overall vibe, and specific stylistic elements (around 150 words)."
             }
         },
+        "story_plan": {
+            "type": "array",
+            "description": "A series of events that form the story's narrative. Aim for 10-15 plot points.",
+            "items": {
+                "type": "string",
+                "description": "A single, concise event in the story. Describe it in 5-15 words."
+            }
+        },
         "premise": {
             "type": "string",
-            "description":  "Define the high-level thesis for the NEXT block of story. This acts as a bridge from the 'past' events to future action. (Aim for around 20 words)"
+            "description":  "Define the high-level thesis for the NEXT block using 'story_plan'. This acts as a bridge from the 'past' events to future actions. (Aim for around 20 words)"
         },
         "current_chapter_synopsis": {
             "type": "string",
@@ -55,6 +63,7 @@ export const STORY_SCHEMA = {
         "world_info",
         "past",
         "characters",
+        "story_plan",
         "premise",
         "current_chapter_synopsis",
         "current_scene_idea",
@@ -64,6 +73,7 @@ export const STORY_SCHEMA = {
         "world_info",
         "past",
         "characters",
+        "story_plan",
         "premise",
         "current_chapter_synopsis",
         "current_scene_idea",
