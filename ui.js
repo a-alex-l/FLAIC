@@ -175,7 +175,7 @@ async function displayCurrentPanel() {
     panelElement.className = 'comic-panel';
     panelElement.id = `panel-${currentEventIndex}`;
 
-    const event = storyData.events[currentEventIndex];
+    const event = storyData.story_beats[currentEventIndex];
     const imageElement = document.createElement('img');
     imageElement.id = `image-${currentEventIndex}`;
     imageElement.alt = event.depiction;

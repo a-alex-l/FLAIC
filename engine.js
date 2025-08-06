@@ -12,7 +12,7 @@ const TEXT_HORIZON = 5;
 // --- APPLICATION STATE ---
 let isGenerating = false; // A lock to prevent simultaneous API calls
 let compressedEventIndex = 0; // Index of the event currently being displayed
-export let storyData = null; // Will hold the entire story object { world_info, characters, events, ... }
+export let storyData = null; // Will hold the entire story object { world_info, characters, story_beats, ... }
 export let base64Images = {}; // Array to store generated images, can have empty slots
 export let currentEventIndex = -1; // Index of the event currently being displayed
 
@@ -23,20 +23,20 @@ export let currentEventIndex = -1; // Index of the event currently being display
 export async function generateNextStep(textService, textModel, textApiKey,
             imageService, imageModel, imageApiKey, prompt, style) {
     if (currentEventIndex >= 0) {
-        if (prompt !== storyData.events[currentEventIndex].caption) {
+        if (prompt !== storyData.story_beats[currentEventIndex].caption) {
             console.log(`Caption for event ${currentEventIndex} changed. Branching story from this point.`);
-            storyData.events.splice(currentEventIndex + 1);
+            storyData.story_beats.splice(currentEventIndex + 1);
         }
-        storyData.events[currentEventIndex].caption = prompt;
+        storyData.story_beats[currentEventIndex].caption = prompt;
     }
     currentEventIndex++;
-    if (!storyData || !storyData.events[currentEventIndex]) {
+    if (!storyData || !storyData.story_beats[currentEventIndex]) {
         console.log("No event found at index, attempting to fetch more story...");
         try {
         await checkAndFetchStoryContinuation(textService, textModel, textApiKey,
                 imageService, imageModel, imageApiKey, prompt, style);
         } finally {
-            if (!storyData || !storyData.events[currentEventIndex]) {
+            if (!storyData || !storyData.story_beats[currentEventIndex]) {
                 currentEventIndex = -1;
                 storyData = null;
                 console.error("Failed to display panel: No event available even after fetch attempt.");
@@ -51,17 +51,17 @@ export async function generateNextStep(textService, textModel, textApiKey,
 
 function CollectPrompt(prompt) {
     if (storyData) {
-    const storySoFar = { ...storyData, events: [] };
+        const storySoFar = { ...storyData, premise: "", current_chapter_synopsis: "", current_scene_idea: "", story_beats: [] };
         
-        const recentEvents = storyData.events.slice(compressedEventIndex, storyData.events.length);
-        compressedEventIndex = storyData.events.length;
+        const recentEvents = storyData.story_beats.slice(compressedEventIndex, storyData.story_beats.length);
+        compressedEventIndex = storyData.story_beats.length;
         const eventData = recentEvents.map(e => e.caption).join('\n');
 
         return "As a creative writer, your task is to write the next part of the story" +
                " in a series of small, sequential, and highly detailed steps." +
                " Imagine you are writing a screenplay or a comic book script" +
                " where every single action, reaction, and line of dialogue needs to be captured." +
-               " It is crucial that these new events logically and immediately follow the 'RECENT_PAST'." +
+               " It is crucial that these new story_beats logically and immediately follow the 'RECENT_PAST'." +
                " Full Story So Far:\n" + JSON.stringify(storySoFar) + "\n\n" +
                " Events that just happened (aka RECENT_PAST):\n" + eventData + "\n\n" +
                " Now, write a detailed description of the immediate aftermath or the very next event that occurs.";
@@ -84,7 +84,7 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
     if (isGenerating)
         return;
     isGenerating = true;
-    if (!storyData || storyData.events.length - currentEventIndex <= TEXT_HORIZON) {
+    if (!storyData || storyData.story_beats.length - currentEventIndex <= TEXT_HORIZON) {
         console.log("Requesting story update.");
         const prompt = CollectPrompt(userPrompt);
         
@@ -110,14 +110,17 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
             newStoryPart = await response.json();
         }
         if (storyData) {
-            storyData.events.push(...newStoryPart.events);
+            storyData.story_beats.push(...newStoryPart.story_beats);
             storyData.past = newStoryPart.past;
+            storyData.premise = newStoryPart.premise;
+            storyData.current_chapter_synopsis = newStoryPart.current_chapter_synopsis;
+            storyData.current_scene_idea = newStoryPart.current_scene_idea;
             storyData.characters = newStoryPart.characters;
             storyData.world_info = newStoryPart.world_info;
         } else {
             storyData = newStoryPart;
         }
-        console.log(`Added ${newStoryPart.events.length} new events. Total events: ${storyData.events.length}`);
+        console.log(`Added ${newStoryPart.story_beats.length} new events. Total events: ${storyData.story_beats.length}`);
         await checkAndFetchImages(imageService, imageModel, imageApiKey, style).catch(console.error);
     }
     isGenerating = false;
@@ -167,10 +170,10 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
  */
 async function checkAndFetchImages(imageService, imageModel, imageApiKey, style) {
     const imagePromises = [];
-    const endIndex = Math.min(storyData.events.length, currentEventIndex + IMAGE_HORIZON);
+    const endIndex = Math.min(storyData.story_beats.length, currentEventIndex + IMAGE_HORIZON);
 
     for (let i = currentEventIndex; i < endIndex; i++) {
-        const depiction = storyData.events[i].depiction;
+        const depiction = storyData.story_beats[i].depiction;
         if (!base64Images[depiction]) {
             base64Images[depiction] = "";
             const promise = checkAndFetchImage(depiction, imageService, imageModel, imageApiKey, style);
