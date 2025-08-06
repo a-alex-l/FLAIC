@@ -57,6 +57,7 @@ export async function generateGeminiText(apiKey, model, prompt) {
         throw new Error(responseData.error?.message || 'Failed to generate image from Gemini.');
     }
 
+    console.log(responseData);
     const jsonText = responseData.candidates[0].content.parts[0].text;
     return JSON.parse(jsonText);
 }
