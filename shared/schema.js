@@ -1,9 +1,9 @@
 export const STORY_SCHEMA = {
     "type": "object",
     "properties": {
-        "world_info": {
+        "story_narative": {
             "type": "string",
-            "description": "General information about the story's world, setting, lore, key mechanics, and any crucial context for an AI to understand the narrative. This should be comprehensive enough to set the stage for the entire story. (Aim for around 300 words)"
+            "description": "General information about the story's world, setting, lore, key mechanics, and any crucial context for an AI to understand the narrative. Key points of the plot and turning points. (Aim for around 300 words)"
         },
         "past": {
             "type": "string",
@@ -52,7 +52,7 @@ export const STORY_SCHEMA = {
         }
     },
     "propertyOrdering": [
-        "world_info",
+        "story_narative",
         "past",
         "characters",
         "premise",
@@ -61,7 +61,7 @@ export const STORY_SCHEMA = {
         "story_beats"
     ],
     "required": [
-        "world_info",
+        "story_narative",
         "past",
         "characters",
         "premise",

@@ -12,7 +12,7 @@ const TEXT_HORIZON = 5;
 // --- APPLICATION STATE ---
 let isGenerating = false; // A lock to prevent simultaneous API calls
 let compressedEventIndex = 0; // Index of the event currently being displayed
-export let storyData = null; // Will hold the entire story object { world_info, characters, story_beats, ... }
+export let storyData = null; // Will hold the entire story object { story_narative, characters, story_beats, ... }
 export let base64Images = {}; // Array to store generated images, can have empty slots
 export let currentEventIndex = -1; // Index of the event currently being displayed
 
@@ -117,7 +117,7 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
             storyData.current_chapter_synopsis = newStoryPart.current_chapter_synopsis;
             storyData.current_scene_idea = newStoryPart.current_scene_idea;
             storyData.characters = newStoryPart.characters;
-            storyData.world_info = newStoryPart.world_info;
+            storyData.story_narative = newStoryPart.story_narative;
         } else {
             storyData = newStoryPart;
         }
