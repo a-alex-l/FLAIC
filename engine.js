@@ -63,16 +63,16 @@ function CollectPrompt(prompt) {
                " in a series of small, sequential, and highly detailed steps." +
                " Imagine you are writing a screenplay or a comic book script" +
                " where every single action, reaction, and line of dialogue needs to be captured." +
-               " It is crucial that these new 'story_beats' logically and immediately follow the 'past'." +
+               " It is crucial that these new 'story_beats' logically and immediately follow the 'past', but remember to introduce new characters and places first as well." +
                " Full Story So Far:\n" + JSON.stringify(storySoFar);
         
     } else {
         return "As a creative writer, generate a story, world and character descriptions based on the following wishes. " +
                "The world should include key locations, history, and culture. " +
                "Generate 3 distinct characters with physical descriptions. " +
-               "There is no past yet so add some background into history for this story. " +
-               "The 'chapter' must begin with an introduction before the main conflict starts. Should start from history for story" +
-               "Wishes about the story:\n" +  prompt;
+               "There is no past leave it empty. " +
+               "Start from Prologue please. " +
+               "Wishes about the story in general:\n" +  prompt;
     }
 }
 
