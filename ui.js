@@ -102,7 +102,7 @@ function syncApiKeys() {
 
 
 function escapeQuotes(str) {
-  return str.replace(/['"]/g, '\\$&');
+    return str.replaceAll('"', '\\"');
 }
 
 
