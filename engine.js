@@ -51,9 +51,8 @@ export async function generateNextStep(textService, textModel, textApiKey,
 
 function CollectPrompt(prompt) {
     if (storyData) {
-        const storySoFar = { ...storyData,
-            premise: "", current_chapter_synopsis: "",
-            current_scene_idea: "", story_beats: [] };
+        const storySoFar = { ...storyData, chapter: "", scene: "",
+            paragraph: "", story_beats: [] };
         
         const recentEvents = storyData.story_beats.slice(compressedEventIndex, storyData.story_beats.length);
         compressedEventIndex = storyData.story_beats.length;
@@ -64,15 +63,15 @@ function CollectPrompt(prompt) {
                " in a series of small, sequential, and highly detailed steps." +
                " Imagine you are writing a screenplay or a comic book script" +
                " where every single action, reaction, and line of dialogue needs to be captured." +
-               " It is crucial that these new story_beats logically and immediately follow the 'past'." +
-               " Full Story So Far:\n" + JSON.stringify(storySoFar) + "\n\n" +
-               " Now, write a detailed description of the immediate aftermath or the very next event that occurs.";
+               " It is crucial that these new 'story_beats' logically and immediately follow the 'past'." +
+               " Full Story So Far:\n" + JSON.stringify(storySoFar);
         
     } else {
-        return "Generate a story, world and character descriptions based on the following wishes. " +
+        return "As a creative writer, generate a story, world and character descriptions based on the following wishes. " +
                "The world should include key locations, history, and culture. " +
                "Generate 3 distinct characters with physical descriptions. " +
                "There is no past yet so add some background into history for this story. " +
+               "The 'chapter' must begin with an introduction before the main conflict starts. Should start from history for story" +
                "Wishes about the story:\n" +  prompt;
     }
 }
@@ -113,9 +112,9 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
         if (storyData) {
             storyData.story_beats.push(...newStoryPart.story_beats);
             storyData.past = newStoryPart.past;
-            storyData.premise = newStoryPart.premise;
-            storyData.current_chapter_synopsis = newStoryPart.current_chapter_synopsis;
-            storyData.current_scene_idea = newStoryPart.current_scene_idea;
+            storyData.chapter = newStoryPart.chapter;
+            storyData.scene = newStoryPart.scene;
+            storyData.paragraph = newStoryPart.paragraph;
             storyData.characters = newStoryPart.characters;
             storyData.story_narative = newStoryPart.story_narative;
         } else {

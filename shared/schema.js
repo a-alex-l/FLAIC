@@ -17,21 +17,21 @@ export const STORY_SCHEMA = {
                 "description": "A description of how a character looks, behaives. Mention colors, race, species, gender, apparent age, build/physique, shapes, positions, poses, clothes, hair style, hair color, skin color, eye color, footwear type, objects/weapons, accessories, distinguishing marks/features, expressions, lighting, texture, condition of cloth, overall vibe, and specific stylistic elements (around 150 words)."
             }
         },
-        "premise": {
+        "chapter": {
             "type": "string",
-            "description":  "Define the high-level thesis for the NEXT block. This acts as a bridge from the 'past' events to future actions. (Aim for around 20 words)"
+            "description":  "Define the high-level thesis for current logical chapter. This acts as a bridge from the 'past' events to future actions. (Aim for around 20 words)"
         },
-        "current_chapter_synopsis": {
+        "scene": {
             "type": "string",
-            "description": "Based on the 'premise' and 'past', outline the key plot points of the current chapter that will follow. (Aim for around 40 words)"
+            "description": "Zoom in on a 'Chapter'. Outline the key plot points of the current scene that will follow. (Aim for around 40 words)"
         },
-        "current_scene_idea": {
+        "paragraph": {
             "type": "string",
-            "description": "Zoom in on a sub-event from the 'current_chapter_synopsis'. This event must logically continue from the 'past'. (Aim for around 50 words)"
+            "description": "Zoom in on a 'Scene'. This paragraph must logically continue from the 'past'. (Aim for around 60 words)"
         },
         "story_beats": {
             "type": "array",
-            "description": "A sequence of panels that tells a story, similar to a comic strip. They unfold the 'current_scene_idea' into the most granular final text. (Aim for around 10 story beats)",        
+            "description": "A sequence of panels that tells a story, similar to a comic strip. They unfold the 'paragraph' into the most granular final text. (Aim for around 10 story beats)",        
             "items": {
                 "type": "object",
                 "properties": {
@@ -55,18 +55,18 @@ export const STORY_SCHEMA = {
         "story_narative",
         "past",
         "characters",
-        "premise",
-        "current_chapter_synopsis",
-        "current_scene_idea",
+        "chapter",
+        "scene",
+        "paragraph",
         "story_beats"
     ],
     "required": [
         "story_narative",
         "past",
         "characters",
-        "premise",
-        "current_chapter_synopsis",
-        "current_scene_idea",
+        "chapter",
+        "scene",
+        "paragraph",
         "story_beats"
     ]
 };
