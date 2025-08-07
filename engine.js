@@ -69,11 +69,11 @@ function CollectPrompt(prompt) {
                " Now, write a detailed description of the immediate aftermath or the very next event that occurs.";
         
     } else {
-        return "Generate a story world and character descriptions based on the following setting. " +
+        return "Generate a story, world and character descriptions based on the following wishes. " +
                "The world should include key locations, history, and culture. " +
                "Generate 3 distinct characters with physical descriptions. " +
-               "There is no past yet so keep it empty. " +
-               "Setting: " +  prompt;
+               "There is no past yet so add some background into history for this story. " +
+               "Wishes about the story:\n" +  prompt;
     }
 }
 
