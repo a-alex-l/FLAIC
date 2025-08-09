@@ -1,4 +1,4 @@
-import { base64Images, currentEventIndex, generateNextStep, storyData } from './engine.js';
+import { base64Images, currentEventIndex, generateNextStep, beats } from './engine.js';
 
 import { generateTogetherAIImage } from './shared/generate_together_ai_image.js';
 
@@ -180,7 +180,7 @@ async function displayCurrentPanel() {
     panelElement.className = 'comic-panel';
     panelElement.id = `panel-${currentEventIndex}`;
 
-    const event = storyData.story_beats[currentEventIndex];
+    const event = beats[currentEventIndex];
     const imageElement = document.createElement('img');
     imageElement.id = `image-${currentEventIndex}`;
     imageElement.alt = event.depiction;

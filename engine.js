@@ -11,8 +11,7 @@ const TEXT_HORIZON = 5;
 
 // --- APPLICATION STATE ---
 let isGenerating = false; // A lock to prevent simultaneous API calls
-let compressedEventIndex = 0; // Index of the event currently being displayed
-export let storyData = null; // Will hold the entire story object { story_narative, characters, story_beats, ... }
+export let beats = []; // Will hold the entire story object { story_narative, characters, story_beats, ... }
 export let base64Images = {}; // Array to store generated images, can have empty slots
 export let currentEventIndex = -1; // Index of the event currently being displayed
 
@@ -23,22 +22,22 @@ export let currentEventIndex = -1; // Index of the event currently being display
 export async function generateNextStep(textService, textModel, textApiKey,
             imageService, imageModel, imageApiKey, prompt, style) {
     if (currentEventIndex >= 0) {
-        if (prompt !== storyData.story_beats[currentEventIndex].caption) {
+        if (prompt !== beats[currentEventIndex].caption) {
             console.log(`Caption for event ${currentEventIndex} changed. Branching story from this point.`);
-            storyData.story_beats.splice(currentEventIndex + 1);
+            beats.splice(currentEventIndex + 1);
+            beats[currentEventIndex].caption = prompt;
         }
-        storyData.story_beats[currentEventIndex].caption = prompt;
     }
     currentEventIndex++;
-    if (!storyData || !storyData.story_beats[currentEventIndex]) {
+    if (!beats[currentEventIndex]) {
         console.log("No event found at index, attempting to fetch more story...");
         try {
-        await checkAndFetchStoryContinuation(textService, textModel, textApiKey,
-                imageService, imageModel, imageApiKey, prompt, style);
+            await checkAndFetchStoryContinuation(textService, textModel, textApiKey,
+                    imageService, imageModel, imageApiKey, prompt, style);
         } finally {
-            if (!storyData || !storyData.story_beats[currentEventIndex]) {
+            if (!beats[currentEventIndex]) {
                 currentEventIndex = -1;
-                storyData = null;
+                beats = [];
                 console.error("Failed to display panel: No event available even after fetch attempt.");
                 throw new Error("Sorry, AI did not generate any events for the story.");
             }
@@ -50,12 +49,11 @@ export async function generateNextStep(textService, textModel, textApiKey,
 }
 
 function CollectPrompt(prompt) {
-    if (storyData) {
-        const storySoFar = { ...storyData, chapter: "", scene: "",
+    if (beats.length != 0) {
+        const storySoFar = { ...beats.at(-1).story, chapter: "", scene: "",
             paragraph: "", story_beats: [] };
         
-        const recentEvents = storyData.story_beats.slice(compressedEventIndex, storyData.story_beats.length);
-        compressedEventIndex = storyData.story_beats.length;
+        const recentEvents = beats.slice(-beats.at(-1).size);
         const eventData = recentEvents.map(e => e.caption).join('\n');
         storySoFar.past += eventData;
 
@@ -85,7 +83,7 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
     if (isGenerating)
         return;
     isGenerating = true;
-    if (!storyData || storyData.story_beats.length - currentEventIndex <= TEXT_HORIZON) {
+    if (beats.length - currentEventIndex <= TEXT_HORIZON) {
         console.log("Requesting story update.");
         const prompt = CollectPrompt(userPrompt);
         let newStoryPart;
@@ -109,18 +107,13 @@ async function checkAndFetchStoryContinuation(textService, textModel, textApiKey
             }
             newStoryPart = await response.json();
         }
-        if (storyData) {
-            storyData.story_beats.push(...newStoryPart.story_beats);
-            storyData.past = newStoryPart.past;
-            storyData.chapter = newStoryPart.chapter;
-            storyData.scene = newStoryPart.scene;
-            storyData.paragraph = newStoryPart.paragraph;
-            storyData.characters = newStoryPart.characters;
-            storyData.story_narative = newStoryPart.story_narative;
-        } else {
-            storyData = newStoryPart;
-        }
-        console.log(`Added ${newStoryPart.story_beats.length} new events. Total events: ${storyData.story_beats.length}`);
+        let localId = 0;
+        newStoryPart.story_beats.forEach(beat => {
+            beat.story = newStoryPart;
+            beat.size = ++localId;
+        });
+        beats.push(...newStoryPart.story_beats);
+        console.log(`Added ${newStoryPart.story_beats.length} new events. Total events: ${beats.length}`);
         await checkAndFetchImages(imageService, imageModel, imageApiKey, style).catch(console.error);
     }
     isGenerating = false;
@@ -170,10 +163,10 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
  */
 async function checkAndFetchImages(imageService, imageModel, imageApiKey, style) {
     const imagePromises = [];
-    const endIndex = Math.min(storyData.story_beats.length, currentEventIndex + IMAGE_HORIZON);
+    const endIndex = Math.min(beats.length, currentEventIndex + IMAGE_HORIZON);
 
     for (let i = currentEventIndex; i < endIndex; i++) {
-        const depiction = storyData.story_beats[i].depiction;
+        const depiction = beats[i].depiction;
         if (!base64Images[depiction]) {
             base64Images[depiction] = "";
             const promise = checkAndFetchImage(depiction, imageService, imageModel, imageApiKey, style);
