@@ -8,9 +8,6 @@ export default async function handler(request, response) {
     }
     try {
         const { service, model, apiKey, user_input } = request.body;
-        if (!service || typeof service !== 'string' || !user_input) {
-            return response.status(400).json({ error: 'Request body is incorrect.' });
-        }
         return response.status(200).json(await generateStart(service, model, apiKey, user_input));
     } catch (error) {
         console.error('Error in generate_story handler:', error);

@@ -77,19 +77,20 @@ async function checkAndFetchStoryStart(textService, textModel, textApiKey, userI
 
 async function checkAndFetchStoryContinuation(textService, textModel, textApiKey) {
     let newStoryPart;
+    const recency = Math.min(beats.length, TEXT_HORIZON);
+    const recentEvents = beats.slice(-recency);
+    const historyEvents = beats.slice(0, -recency);
+    const resentStory = recentEvents.map(e => e.caption).join('\n');
+    const history = historyEvents.map(e => e.caption).join('\n');
     try {
-        const recency = Math.min(beats.length, TEXT_HORIZON);
-        const recentEvents = beats.slice(-recency);
-        const historyEvents = beats.slice(0, -recency);
-        const resent_story = recentEvents.map(e => e.caption).join('\n');
-        const history = historyEvents.map(e => e.caption).join('\n');
         newStoryPart =  await generateContinuation(textService, textModel, textApiKey,
-                foundation, history, resent_story);
+                foundation, history, resentStory);
     } catch {
         const response = await fetch('/api/generate_story_continuation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ service: textService, apiKey: textApiKey, model: textModel, prompt: prompt })
+            body: JSON.stringify({ service: textService, apiKey: textApiKey, model: textModel,
+                foundation: foundation, history: history, resent_story: resentStory })
         });
         if (!response.ok) {
             console.error("Failed to fetch story update:", (await response.json()).error);
