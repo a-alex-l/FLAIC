@@ -119,7 +119,7 @@ Now, continue the story immediately from where it left off in about 4000 words.`
 
 
 
-export const STORY_JSONIFICATION_PROMPT = (history, story, foundation) => `You are an expert at translating narrative prose into a visual script format. Your task is to analyze the provided story text and break it down into a sequence of key scenes or "moments," formatted as a JSON array.
+export const STORY_JSONIFICATION_PROMPT = (history, story, foundation) => `You are an expert at deconstructing narrative prose into a frame-by-frame visual script. Your task is to process the provided story text sequentially and break it down into a highly granular visual script, formatted as a JSON array.
 
 **Outline history (for context):** Use the key events from this outline to help you identify the most important moments that should become individual scenes.
 "${JSON.stringify(history)}"
@@ -130,4 +130,4 @@ export const STORY_JSONIFICATION_PROMPT = (history, story, foundation) => `You a
 **Story Text to Analyze:** This is the narrative you will be converting.
 "${JSON.stringify(story)}"
 
-Now, generate the JSON array.`;
+Now, generate the JSON array based on a granular, frame-by-frame analysis of the 'Story Text to Analyze'`;
