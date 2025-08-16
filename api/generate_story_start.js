@@ -1,4 +1,4 @@
-import { generateContinuation } from '../shared/generate_text.js';
+import { generateStart } from '../shared/generate_text.js';
 
 
 export default async function handler(request, response) {
