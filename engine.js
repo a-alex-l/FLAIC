@@ -1,5 +1,4 @@
-import { generateGeminiText } from './shared/generate_gemini_text.js';
-
+import { generateStart, generateContinuation } from '../shared/generate_text.js';
 import { generateTensorOperaImage } from './shared/generate_tensoropera_image.js';
 import { generateTogetherAIImage, downloadImageAsBase64 } from './shared/generate_together_ai_image.js';
 import { generateGeminiImage } from './shared/generate_gemini_image.js';
@@ -14,7 +13,7 @@ let isGenerating = false; // A lock to prevent simultaneous API calls
 export let beats = []; // Will hold the entire story object { story_narative, characters, story_beats, ... }
 export let base64Images = {}; // Array to store generated images, can have empty slots
 export let currentEventIndex = -1; // Index of the event currently being displayed
-
+let foundation = "";
 
 /**
  * Generates and displays the next event in the story sequence.
@@ -32,7 +31,7 @@ export async function generateNextStep(textService, textModel, textApiKey,
     if (!beats[currentEventIndex]) {
         console.log("No event found at index, attempting to fetch more story...");
         try {
-            await checkAndFetchStoryContinuation(textService, textModel, textApiKey,
+            await checkAndFetchStory(textService, textModel, textApiKey,
                     imageService, imageModel, imageApiKey, prompt, style);
         } finally {
             if (!beats[currentEventIndex]) {
@@ -43,77 +42,85 @@ export async function generateNextStep(textService, textModel, textApiKey,
             }
         }
     }
-    checkAndFetchStoryContinuation(textService, textModel, textApiKey,
+    checkAndFetchStory(textService, textModel, textApiKey,
         imageService, imageModel, imageApiKey, prompt, style).catch(console.error);
     checkAndFetchImages(imageService, imageModel, imageApiKey, style).catch(console.error);
 }
 
-function CollectPrompt(prompt) {
-    if (beats.length != 0) {
-        const storySoFar = { ...beats.at(-1).story, chapter: "", scene: "",
-            paragraph: "", story_beats: [] };
-        
-        const recentEvents = beats.slice(-beats.at(-1).size);
-        const eventData = recentEvents.map(e => e.caption).join('\n');
-        storySoFar.past += eventData;
 
-        return "As a creative writer, your task is to write the next part of the story" +
-               " in a series of small, sequential, and highly detailed steps." +
-               " Imagine you are writing a screenplay or a comic book script" +
-               " where every single action, reaction, and line of dialogue needs to be captured." +
-               " It is crucial that these new 'story_beats' logically and immediately follow the 'past', but remember to introduce new characters and places first as well." +
-               " Full Story So Far:\n" + JSON.stringify(storySoFar);
-        
-    } else {
-        return "As a creative writer, generate a story, world and character descriptions based on the following wishes. " +
-               "The world should include key locations, history, and culture. " +
-               "Generate 3 distinct characters with physical descriptions. " +
-               "There is no past leave it empty. " +
-               "Start from Prologue please. " +
-               "Wishes about the story in general:\n" +  prompt;
+async function checkAndFetchStoryStart(textService, textModel, textApiKey, userInput) {
+    let newStoryPart;
+    try {
+        newStoryPart =  await generateStart(textService, textModel, textApiKey, userInput);
+    } catch {
+        const response = await fetch('/api/generate_story_start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ service: textService, apiKey: textApiKey, model: textModel, user_input: userInput })
+        });
+        if (!response.ok) {
+            console.error("Failed to fetch story update:", (await response.json()).error);
+            isGenerating = false;
+            throw new Error('Failed to fetch story update.');
+        }
+        newStoryPart = await response.json();
     }
+    let localId = 0;
+    newStoryPart.story_beats.forEach(beat => {
+        beat.story = newStoryPart;
+        beat.size = ++localId;
+    });
+    beats.push(...newStoryPart.story_beats);
+    foundation = newStoryPart.foundation;
 }
 
-/**
- * Checks if more story events are needed and fetches them.
- * Triggered if fewer than TEXT_HORIZON events are left in the queue.
- */
-async function checkAndFetchStoryContinuation(textService, textModel, textApiKey,
+
+async function checkAndFetchStoryContinuation(textService, textModel, textApiKey) {
+    let newStoryPart;
+    try {
+        const recency = Math.min(beats.length, TEXT_HORIZON);
+        const recentEvents = beats.slice(-recency);
+        const historyEvents = beats.slice(0, -recency);
+        const resent_story = recentEvents.map(e => e.caption).join('\n');
+        const history = historyEvents.map(e => e.caption).join('\n');
+        newStoryPart =  await generateContinuation(textService, textModel, textApiKey,
+                foundation, history, resent_story);
+    } catch {
+        const response = await fetch('/api/generate_story_continuation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ service: textService, apiKey: textApiKey, model: textModel, prompt: prompt })
+        });
+        if (!response.ok) {
+            console.error("Failed to fetch story update:", (await response.json()).error);
+            isGenerating = false;
+            throw new Error('Failed to fetch story update.');
+        }
+        newStoryPart = await response.json();
+    }
+    let localId = 0;
+    newStoryPart.story_beats.forEach(beat => {
+        beat.story = newStoryPart;
+        beat.size = ++localId;
+    });
+    beats.push(...newStoryPart.story_beats);
+}
+
+
+async function checkAndFetchStory(textService, textModel, textApiKey,
             imageService, imageModel, imageApiKey, userPrompt, style) {
     if (isGenerating)
         return;
     isGenerating = true;
     if (beats.length - currentEventIndex <= TEXT_HORIZON) {
         console.log("Requesting story update.");
-        const prompt = CollectPrompt(userPrompt);
-        let newStoryPart;
-        try {
-            if (textService === "Google AI Studio") {
-                newStoryPart = await generateGeminiText(textApiKey, textModel, prompt);
-            } else {
-                console.error('Somehow got unexisting Text Provider.');
-                throw new Error('Somehow got unexisting Text Provider.');
-            }
-        } catch {
-            const response = await fetch('/api/generate_story', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ service: textService, apiKey: textApiKey, model: textModel, prompt: prompt })
-            });
-            if (!response.ok) {
-                console.error("Failed to fetch story update:", (await response.json()).error);
-                isGenerating = false;
-                throw new Error('Failed to fetch story update.');
-            }
-            newStoryPart = await response.json();
+        if (beats.length === 0) {
+            await checkAndFetchStoryStart(textService, textModel, textApiKey, userPrompt);
+        } else {
+            await checkAndFetchStoryContinuation(textService, textModel, textApiKey);
         }
-        let localId = 0;
-        newStoryPart.story_beats.forEach(beat => {
-            beat.story = newStoryPart;
-            beat.size = ++localId;
-        });
-        beats.push(...newStoryPart.story_beats);
-        console.log(`Added ${newStoryPart.story_beats.length} new events. Total events: ${beats.length}`);
+
+        console.log(`Added new events. Total events: ${beats.length}`);
         await checkAndFetchImages(imageService, imageModel, imageApiKey, style).catch(console.error);
     }
     isGenerating = false;
@@ -151,7 +158,7 @@ async function checkAndFetchImage(depiction, imageService, imageModel, imageApiK
         } else if ('url' in json) {
             base64Images[depiction] = downloadImageAsBase64(json.url);
         } else {
-            confirm.error(`Unexpected image json: ${json}`);
+            console.error(`Unexpected image json: ${json}`);
             base64Images[depiction] = "Failed";
         }
     }
