@@ -37,10 +37,17 @@ Provide a description for each. Include appearance, core motivation, charisma.
 export const OUTLINE_START_PROMPT = (user_input, foundation) => `You are a master plotter and structural editor. Your task is to create a detailed plot outline for the introductory section of a story. This blueprint will be used to write the story's opening.
 The outline must be clear, logical, and accomplish three things: establish a compelling hook, introduce the protagonist, and launch the central conflict.
 
+**Key Crafting Goals:**
+*   **Show, Don't Tell:** Bring the outline to life through action, dialogue, and sensory details rather than stating facts directly.
+*   **Establish Tone & Atmosphere:** Set the story's mood from the very first paragraph.
+*   **Voice:** Write in a clear and engaging third-person limited perspective, closely following the protagonist's thoughts and feelings.
+*   **Pacing:** Manage the flow of information to build suspense and draw the reader in.
+*   **Use Characters from Story Foundation:** If it is named character use ones already created in foundation.
+
 **Primary Idea:**
 "${user_input}"
 
-**Story foundation:**
+**Story Foundation:**
 "${foundation}"
 
 Now, create a detailed starting plot outline with 3-5 key bullet points.`;
@@ -93,7 +100,7 @@ export const STORY_CONTINUATION_PROMPT = (foundation, history, recent_in_depth_s
 **Critical Instructions:**
 *   **Seamless Transition:** Your first sentence must flow directly from the last sentence of the "Story So Far." No summaries or lead-ins.
 *   **Consistent Voice & Tone:** Write in the exact same narrative style and maintain the established atmosphere.
-*   **Character Consistency:** Ensure all character actions, dialogue, and internal thoughts align perfectly with their previous portrayal.
+*   **Character Consistency:** Ensure all character actions, dialogue, and internal thoughts align perfectly with their previous portrayal and froundation description.
 *   **Follow the New Outline:** Use the new outline as the blueprint for the events in this section.
 
 **Story foundation:**
