@@ -8,7 +8,7 @@ const SAFETY_SETTINGS = [
 ];
 
 function getApiKey(apiKey) {
-    if (typeof process !== 'undefined' && apiKey == process.env.TEST_PASSWORD)
+    if (typeof process !== 'undefined' && (apiKey == "" || apiKey == process.env.TEST_PASSWORD))
         return process.env.GEMINI_API_KEY;
     if (!apiKey) {
         console.warn('GEMINI_API_KEY is not set or provided by the client.');
