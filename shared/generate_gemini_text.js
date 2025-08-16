@@ -7,6 +7,7 @@ const SAFETY_SETTINGS = [
     { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
 ];
 
+
 function getApiKey(apiKey) {
     if (typeof process !== 'undefined' && (apiKey == "" || apiKey == process.env.TEST_PASSWORD))
         return process.env.GEMINI_API_KEY;
@@ -17,9 +18,17 @@ function getApiKey(apiKey) {
     return apiKey;
 }
 
+function getUrl(apiKey, model) {
+    if (typeof process !== 'undefined' && apiKey == process.env.GEMINI_API_KEY) {
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey(apiKey)}`;
+    } else {
+        return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${getApiKey(apiKey)}`;
+    }
+}
+
 
 export async function generateGeminiText(apiKey, model, prompt) {
-    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${getApiKey(apiKey)}`;
+    const geminiApiUrl = getUrl(getApiKey(apiKey), model)
     const requestBody = {
         "contents": [{ "parts": [{ "text": prompt }] }],
         "generationConfig": { "response_mime_type": "application/json" },

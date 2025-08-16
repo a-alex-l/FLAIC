@@ -35,7 +35,7 @@ async function generateJson(service, model, apiKey, prompt) {
         }
     } catch {
         if (typeof process !== 'undefined') {
-            return await generateGeminiJson("", "gemini-2.5-flash", prompt);
+            return await generateGeminiJson("", "gemini-2.5-flash-lite", prompt);
         } else {
             console.warning("Couldn't request json data");
             throw new Error("Couldn't request json data");
