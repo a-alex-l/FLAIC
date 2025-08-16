@@ -50,7 +50,7 @@ The outline must be clear, logical, and accomplish three things: establish a com
 **Story Foundation:**
 "${JSON.stringify(foundation)}"
 
-Now, create a detailed starting plot outline with 3-5 key bullet points.`;
+Now, create a detailed starting plot outline with 10 key bullet points.`;
 
 
 
@@ -68,7 +68,7 @@ export const STORY_START_PROMPT = (outline, foundation) => `You are a master sto
 **Story Foundation:**
 "${JSON.stringify(foundation)}"
 
-Now, write the opening of the story.`;
+Now, write the opening of the story in about 4000 words.`;
 
 
 
@@ -91,7 +91,7 @@ First, carefully review the context provided to understand the characters, plot,
 **Recent in Depth Story So Far (curent last sentence here):**
 "${JSON.stringify(recent_in_depth_story)}"
 
-Now, create the next detailed plot outline with 3-5 key bullet points that immediately follow the "Story Written So Far".`;
+Now, create the next detailed plot outline with 10 key bullet points that immediately follow the "Story Written So Far".`;
 
 
 
@@ -115,7 +115,7 @@ export const STORY_CONTINUATION_PROMPT = (foundation, history, recent_in_depth_s
 **New Outline to Follow:**
 "${JSON.stringify(outline)}"
 
-Now, continue the story immediately from where it left off.`;
+Now, continue the story immediately from where it left off in about 4000 words.`;
 
 
 
