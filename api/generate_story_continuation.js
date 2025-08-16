@@ -9,7 +9,7 @@ export default async function handler(request, response) {
     try {
         const { service, model, apiKey, foundation, history, recent_story } = request.body;
         if (!service || typeof service !== 'string' || !model ||
-                !apiKey || !foundation || !history || !recent_story) {
+                !foundation || !history || !recent_story) {
             return response.status(400).json({ error: 'Request body is incorrect.' });
         }
         return response.status(200).json(await generateContinuation(service, model, apiKey, foundation, history, recent_story));
