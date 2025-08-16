@@ -9,7 +9,7 @@ First, carefully review the seed ideas and names provided for inspiration. Then,
 *   **Use the Names:** Assign the provided "Name Seed" to characters and places to ensure originality.
 
 **Primary Idea:**
-"${user_input}"
+"${JSON.stringify(user_input)}"
 
 **Inspiration Seed (Ideas):**
 "${ideas}"
@@ -45,10 +45,10 @@ The outline must be clear, logical, and accomplish three things: establish a com
 *   **Use Characters from Story Foundation:** If it is named character use ones already created in foundation.
 
 **Primary Idea:**
-"${user_input}"
+"${JSON.stringify(user_input)}"
 
 **Story Foundation:**
-"${foundation}"
+"${JSON.stringify(foundation)}"
 
 Now, create a detailed starting plot outline with 3-5 key bullet points.`;
 
@@ -63,10 +63,10 @@ export const STORY_START_PROMPT = (outline, foundation) => `You are a master sto
 *   **Pacing:** Manage the flow of information to build suspense and draw the reader in.
 
 **Outline to Follow:**
-"${outline}"
+"${JSON.stringify(outline)}"
 
-**Story foundation:**
-"${foundation}"
+**Story Foundation:**
+"${JSON.stringify(foundation)}"
 
 Now, write the opening of the story.`;
 
@@ -82,14 +82,14 @@ First, carefully review the context provided to understand the characters, plot,
 *   **Develop Characters:** Use the new events to test the protagonist and reveal new aspects of their personality or backstory.
 *   **Maintain Consistency:** Ensure all new plot points align with the established world and character motivations.
 
-**Story foundation:**
-"${foundation}"
+**Story Foundation:**
+"${JSON.stringify(foundation)}"
 
 **Outline History:**
-"${history}"
+"${JSON.stringify(history)}"
 
 **Recent in Depth Story So Far (curent last sentence here):**
-"${recent_in_depth_story}"
+"${JSON.stringify(recent_in_depth_story)}"
 
 Now, create the next detailed plot outline with 3-5 key bullet points that immediately follow the "Story Written So Far".`;
 
@@ -103,17 +103,17 @@ export const STORY_CONTINUATION_PROMPT = (foundation, history, recent_in_depth_s
 *   **Character Consistency:** Ensure all character actions, dialogue, and internal thoughts align perfectly with their previous portrayal and froundation description.
 *   **Follow the New Outline:** Use the new outline as the blueprint for the events in this section.
 
-**Story foundation:**
-"${foundation}"
+**Story Foundation:**
+"${JSON.stringify(foundation)}"
 
 **Outline History (for context):**
-"${history}"
+"${JSON.stringify(history)}"
 
 **Recent in Depth Story So Far (curent last sentence here):**
-"${recent_in_depth_story}"
+"${JSON.stringify(recent_in_depth_story)}"
 
 **New Outline to Follow:**
-"${outline}"
+"${JSON.stringify(outline)}"
 
 Now, continue the story immediately from where it left off.`;
 
@@ -122,12 +122,12 @@ Now, continue the story immediately from where it left off.`;
 export const STORY_JSONIFICATION_PROMPT = (history, story, foundation) => `You are an expert at translating narrative prose into a visual script format. Your task is to analyze the provided story text and break it down into a sequence of key scenes or "moments," formatted as a JSON array.
 
 **Outline history (for context):** Use the key events from this outline to help you identify the most important moments that should become individual scenes.
-"${history}"
+"${JSON.stringify(history)}"
 
-**Story foundation (for context):** Use world description and character appearance to depict scenes.
-"${foundation}"
+**Story Foundation (for context):** Use world description and character appearance to depict scenes.
+"${JSON.stringify(foundation)}"
 
 **Story Text to Analyze:** This is the narrative you will be converting.
-"${story}"
+"${JSON.stringify(story)}"
 
 Now, generate the JSON array.`;
