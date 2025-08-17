@@ -175,8 +175,8 @@ async function checkAndFetchImages(imageService, imageModel, imageApiKey, style)
 
     for (let i = currentEventIndex; i < endIndex; i++) {
         const depiction = beats[i].depiction;
-        if (!base64Images[depiction]) {
-            base64Images[depiction] = "";
+        if (!base64Images[depiction] && base64Images[depiction] != "Generating") {
+            base64Images[depiction] = "Generating";
             const promise = checkAndFetchImage(depiction, imageService, imageModel, imageApiKey, style);
             imagePromises.push(promise);
         }

@@ -186,7 +186,7 @@ async function displayCurrentPanel() {
     imageElement.alt = event.depiction;
 
     const imageData = base64Images[event.depiction];
-    if (imageData && imageData != "") {
+    if (imageData && imageData != "Generating") {
         imageElement.src = addType(imageData);
     } else {
         imageElement.src = "";
@@ -218,7 +218,7 @@ function waitForImage(depiction, eventIndex) {
     return new Promise(resolve => {
         let watingCount = 100;
         const intervalId = setInterval(() => {
-            if (base64Images[depiction] && base64Images[depiction] != "") {
+            if (base64Images[depiction] && base64Images[depiction] != "Generating") {
                 const imgElement = document.getElementById(`image-${eventIndex}`);
                 if (imgElement && base64Images[depiction] != "Failed") {
                     imgElement.src = addType(base64Images[depiction]);
