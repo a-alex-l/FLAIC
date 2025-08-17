@@ -54,7 +54,7 @@ Now, create a detailed starting plot outline with 10 key bullet points.`;
 
 
 
-export const STORY_START_PROMPT = (outline, foundation) => `You are a master storyteller. Your task is to write the opening of a story by transforming the key events from the provided **Plot Outline** into a compelling narrative. Use the **Story Foundation** for descriptive details about characters, setting, and magic.
+export const STORY_START_PROMPT = (outline, foundation) => `You are a master storyteller. Your task is to write the prologue and opening of a story by transforming the key events from the provided **Plot Outline** into a compelling narrative. Use the **Story Foundation** for descriptive details about characters, setting, and magic.
 
 **Key Crafting Goals:**
 *   **Show, Don't Tell:** Bring the outline to life through action, dialogue, and sensory details rather than stating facts directly.
