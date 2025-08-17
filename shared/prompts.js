@@ -34,8 +34,8 @@ Provide a description for each. Include appearance, core motivation, charisma.
 
 
 
-export const OUTLINE_START_PROMPT = (user_input, foundation) => `You are a master plotter and structural editor. Your task is to create a detailed plot outline for the introductory section of a story. This blueprint will be used to write the story's opening.
-The outline must be clear, logical, and accomplish three things: establish a compelling hook, introduce the protagonist, and launch the central conflict.
+export const OUTLINE_START_PROMPT = (user_input, foundation) => `You are a master plotter and structural editor. Your task is to create a detailed plot outline for the prologue and introductory section of a story. This blueprint will be used to write the story's opening.
+The outline must be clear, logical, and accomplish three things: introduce the protagonist, establish a compelling hook, and launch the central conflict.
 
 **Key Crafting Goals:**
 *   **Show, Don't Tell:** Bring the outline to life through action, dialogue, and sensory details rather than stating facts directly.
@@ -54,7 +54,7 @@ Now, create a detailed starting plot outline with 10 key bullet points.`;
 
 
 
-export const STORY_START_PROMPT = (outline, foundation) => `You are a master storyteller. Your task is to write the opening of a story based *only* on the provided plot outline. Transform the structural points of the outline into a compelling narrative.
+export const STORY_START_PROMPT = (outline, foundation) => `You are a master storyteller. Your task is to write the opening of a story by transforming the key events from the provided **Plot Outline** into a compelling narrative. Use the **Story Foundation** for descriptive details about characters, setting, and magic.
 
 **Key Crafting Goals:**
 *   **Show, Don't Tell:** Bring the outline to life through action, dialogue, and sensory details rather than stating facts directly.
@@ -68,7 +68,7 @@ export const STORY_START_PROMPT = (outline, foundation) => `You are a master sto
 **Story Foundation:**
 "${JSON.stringify(foundation)}"
 
-Now, write the opening of the story in about 4000 words.`;
+Now, write the opening of the story, ensuring a thorough and engaging pace. Expand on each point from the outline to fully develop the scene, characters, and atmosphere.`;
 
 
 
@@ -115,7 +115,7 @@ export const STORY_CONTINUATION_PROMPT = (foundation, history, recent_in_depth_s
 **New Outline to Follow:**
 "${JSON.stringify(outline)}"
 
-Now, continue the story immediately from where it left off in about 4000 words.`;
+Now, continue the story immediately from where it left off, ensuring a thorough and engaging pace. Expand on each point from the outline to fully develop the scene, characters, and atmosphere.`;
 
 
 
