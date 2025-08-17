@@ -5,8 +5,8 @@ import { generateGeminiImage } from './shared/generate_gemini_image.js';
 
 
 // --- CONSTANTS ---
-const IMAGE_HORIZON = 3;
-const TEXT_HORIZON = 5;
+const IMAGE_HORIZON = 5;
+const TEXT_HORIZON = 9;
 
 // --- APPLICATION STATE ---
 let isGenerating = false; // A lock to prevent simultaneous API calls
